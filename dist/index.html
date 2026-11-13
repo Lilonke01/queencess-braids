@@ -6,6 +6,7 @@
   <meta name="description" content="Explore Queencess Braids, a mobile braiding salon, and try the appointment booking demo.">
   <title>Queencess Braids | Mobile Braiding Salon</title>
   <link rel="stylesheet" href="style.css">
+  <!-- Defer the script until the page elements are ready. -->
   <script src="booking.js" defer></script>
 </head>
 <body>
@@ -14,6 +15,7 @@
     <nav aria-label="Main navigation"><a href="#styles">Styles</a><a class="nav-book" href="#booking">Book a visit ↗</a></nav>
   </header>
   <main id="home">
+    <!-- Introduce the mobile salon and link visitors to the booking form. -->
     <section class="shell hero" aria-labelledby="hero-title">
       <div class="hero-copy">
         <p class="eyebrow"><span></span> MOBILE BRAIDING SALON</p>
@@ -26,6 +28,7 @@
         <figcaption>Style inspiration · AI-generated image</figcaption>
       </figure>
     </section>
+    <!-- Each style button uses data-style to select the matching option in the form. -->
     <section class="styles" id="styles">
       <div class="shell">
         <p class="eyebrow">THE STYLE MENU</p>
@@ -38,6 +41,7 @@
         </div>
       </div>
     </section>
+    <!-- Collect a style, fictional travel area, and preferred appointment slot. -->
     <section class="shell booking" id="booking">
       <div>
         <p class="eyebrow">MOBILE APPOINTMENTS</p><h2>Request a visit</h2>
@@ -53,6 +57,7 @@
         <p id="feedback" role="status"></p>
       </form>
     </section>
+    <!-- Reviewers can try the owner workflow in the same browser. -->
     <section class="shell owner" aria-label="Owner demo">
       <details id="owner"><summary>Open salon-owner demo</summary>
         <p class="muted">Review requests created in this browser. This demo is open to reviewers.</p>

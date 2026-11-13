@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;1,500&display=swap');
+/* Shared colors and typography for the salon website. */
 :root{--ink:#311c22;--wine:#731e40;--paper:#fff8f3;--rose:#f7e6df;--line:#e6cbc4;--muted:#664d53;--serif:"Playfair Display",Georgia,serif}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
@@ -15,6 +16,7 @@ button{cursor:pointer}
 nav,.actions{display:flex;align-items:center;gap:24px;flex-wrap:wrap}
 nav a{text-decoration:none;font-weight:700;font-size:14px}
 .nav-book{border:1px solid var(--line);padding:10px 16px;border-radius:4px;color:var(--wine)}
+/* Place the salon introduction beside the portrait on wider screens. */
 .hero{display:grid;grid-template-columns:1.05fr 1fr;gap:5%;align-items:center;padding-block:42px 52px}
 .eyebrow{color:var(--wine);font-size:12px;font-weight:700;letter-spacing:.18em}
 .eyebrow span{display:inline-block;background:var(--wine);width:20px;height:1px;margin:0 8px 4px 0}
@@ -33,11 +35,13 @@ figure{margin:0}
 figure img{display:block;width:100%;height:clamp(420px,45vw,620px);object-fit:cover;object-position:center 32%;border-radius:48% 48% 5px 5px}
 figcaption{text-align:right;color:var(--muted);font-size:12px;margin-top:7px}
 .styles{background:var(--rose);padding-block:54px 62px}
+/* Keep the sample style cards in a single row when space allows. */
 .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:24px}
 article,form,details{background:#fffaf7;border:1px solid var(--line);border-radius:5px;padding:24px}
 article span{color:var(--wine);display:block;font-size:24px;margin-bottom:12px}
 article p{color:var(--muted)}
 .pick{border:0;background:none;padding:0;text-align:left;text-decoration:underline}
+/* Align the booking instructions and form side by side. */
 .booking{display:grid;grid-template-columns:1fr 1fr;gap:7%;padding-block:62px 26px}
 .note{border-left:2px solid var(--wine);padding-left:12px;font-size:14px}
 form label,.field{display:grid;gap:5px;margin-bottom:14px;font-weight:700}
@@ -51,6 +55,7 @@ summary{cursor:pointer;color:var(--wine);font-weight:700}
 .request-row button{background:white;color:var(--wine);border:1px solid #b98d99;border-radius:4px;padding:6px 10px;margin-right:5px}
 footer.top{border-top:1px solid var(--line);border-bottom:0}
 footer span{font-size:13px}
+/* Stack the main sections and style cards on smaller screens. */
 @media(max-width:760px){
   .shell{width:calc(100% - 36px)}
   .hero,.booking{grid-template-columns:1fr;gap:26px}
@@ -60,4 +65,5 @@ footer span{font-size:13px}
   .cards{grid-template-columns:1fr}
 }
 @media(max-width:400px){.top{flex-wrap:wrap;padding-block:12px}.brand{font-size:23px}nav,.actions{gap:12px}.pair{grid-template-columns:1fr}}
+/* Respect the visitor's reduced motion preference. */
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}

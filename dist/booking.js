@@ -1,5 +1,6 @@
 "use strict";
 
+// Store demo requests in this browser so reviewers can reload and keep their progress.
 const storageKey = "queencess-bookings-v1";
 const form = document.querySelector("#request");
 const feedback = document.querySelector("#feedback");
@@ -10,6 +11,7 @@ function readRequests() {
   return JSON.parse(localStorage.getItem(storageKey) ?? "[]");
 }
 
+// Use the salon time zone when deciding which appointment dates are in the past.
 function dateInSouthAfrica() {
   const parts = new Intl.DateTimeFormat("en-ZA", {
     timeZone: "Africa/Johannesburg", year: "numeric", month: "2-digit", day: "2-digit",
@@ -18,6 +20,7 @@ function dateInSouthAfrica() {
   return [get("year"), get("month"), get("day")].join("-");
 }
 
+// Update the client status and rebuild the owner panel from the saved requests.
 function render(requests) {
   board.replaceChildren();
   latest.textContent = requests.length ? `Latest demo request: ${requests[0].status}.` : "";
@@ -37,6 +40,7 @@ function render(requests) {
     info.append(title, slot);
     row.append(info);
 
+    // The owner can decide on a pending request once.
     if (request.status === "Pending") {
       const controls = document.createElement("div");
       for (const decision of ["Accept", "Decline"]) {
@@ -45,6 +49,7 @@ function render(requests) {
         button.textContent = decision;
         button.setAttribute("aria-label", `${decision} ${request.style} on ${request.date} at ${request.time}`);
         button.addEventListener("click", () => {
+          // Reload the saved request before applying a decision in case another tab changed it.
           const requests = readRequests();
           const current = requests.find((entry) => entry.id === request.id);
           if (current?.status === "Pending") {
@@ -61,6 +66,7 @@ function render(requests) {
   }
 }
 
+// Update the screen only after the browser successfully stores the change.
 function save(requests) {
   try {
     localStorage.setItem(storageKey, JSON.stringify(requests));
@@ -73,6 +79,7 @@ function save(requests) {
 }
 
 form.elements.date.min = dateInSouthAfrica();
+// Selecting a card fills the style field and moves focus to the form.
 for (const button of document.querySelectorAll(".pick")) {
   button.addEventListener("click", () => {
     form.elements.style.value = button.dataset.style;
@@ -89,6 +96,7 @@ form.addEventListener("submit", (event) => {
     return;
   }
   const requests = readRequests();
+  // Declined requests can be submitted again with the same appointment details.
   if (requests.some((entry) => entry.status !== "Declined" &&
     ["style", "area", "date", "time"].every((field) => entry[field] === data[field]))) {
     feedback.textContent = "A request for these details already exists.";
@@ -100,6 +108,7 @@ form.addEventListener("submit", (event) => {
   }
 });
 
+// Refresh the display when another tab changes the stored requests.
 window.addEventListener("storage", (event) => {
   if (event.key === storageKey || event.key === null) render(readRequests());
 });
