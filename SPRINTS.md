@@ -3,8 +3,8 @@
 | Sprint | Outcome | Status |
 | --- | --- | --- |
 | 1 · Define | Choose a mobile braiding appointment workflow and document what needs field validation. | Complete |
-| 2 · Build | Create a responsive service menu, client request form and owner booking board using fictional data. | See Git history |
-| 3 · Verify | Check the client-to-owner flow and package reviewer instructions. | See Git history |
+| 2 · Build | Create a responsive service menu, client request form and owner booking board using fictional data. | Complete |
+| 3 · Verify | Check the client-to-owner flow and package reviewer instructions. | Complete |
 | 4 · Validate and submit | Confirm the problem with real users, test the workflow, prepare the walkthrough and submit by 30 November 2026. | Pending fieldwork |
 
 ## Problem to validate
@@ -16,3 +16,12 @@ For Route A, ask the owner for permission, observe how an appointment is current
 ## Walkthrough outline
 
 Identify the people affected and explain the current workflow. Show a booking moving from client request to owner decision. Explain why a structured form was chosen, include real feedback or test results, and describe what to build next. Keep the final walkthrough to five minutes or two pages.
+
+
+## Verification
+
+In Edge, submitted requests for knotless and boho braids, exercised both owner decisions, and confirmed that decisions persisted after reload. Checked image loading and horizontal overflow at 390 px and 1440 px.
+
+## Submission items still open
+
+Confirm the real salon workflow and service menu with the owner, collect real feedback, and complete the short walkthrough. Provide the reviewer link and setup steps. Push the commit history to a private GitHub, GitLab or Bitbucket repository you control before submitting.

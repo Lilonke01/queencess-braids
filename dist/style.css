@@ -4,7 +4,8 @@
 html{scroll-behavior:smooth}
 body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 "DM Sans",Arial,sans-serif}
 a{color:inherit}
-button,input,select{font:inherit}
+button,.field label{margin:0}
+input,select{font:inherit}
 button{cursor:pointer}
 :focus-visible{outline:3px solid #9a335a;outline-offset:4px}
 .shell{width:min(1200px,calc(100% - 96px));margin-inline:auto}
@@ -39,7 +40,8 @@ article p{color:var(--muted)}
 .pick{border:0;background:none;padding:0;text-align:left;text-decoration:underline}
 .booking{display:grid;grid-template-columns:1fr 1fr;gap:7%;padding-block:62px 26px}
 .note{border-left:2px solid var(--wine);padding-left:12px;font-size:14px}
-form label{display:grid;gap:5px;margin-bottom:14px;font-weight:700}
+form label,.field{display:grid;gap:5px;margin-bottom:14px;font-weight:700}
+.field label{margin:0}
 input,select{background:white;color:var(--ink);width:100%;min-width:0;border:1px solid #b98d99;border-radius:4px;padding:10px}
 .pair{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 #feedback:empty,#latest:empty{display:none}

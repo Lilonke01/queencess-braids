@@ -46,8 +46,8 @@
         <p id="latest" role="status"></p>
       </div>
       <form id="request">
-        <label>Style<select name="style" required><option value="">Select a style</option><option>Knotless braids</option><option>Feed-in cornrows</option><option>Boho braids</option></select></label>
-        <label>Sample area<select name="area" required><option value="">Select a sample area</option><option>Demo North</option><option>Demo Central</option><option>Demo South</option></select></label>
+        <div class="field"><label for="style">Style</label><select id="style" name="style" required><option value="">Select a style</option><option>Knotless braids</option><option>Feed-in cornrows</option><option>Boho braids</option></select></div>
+        <div class="field"><label for="area">Sample area</label><select id="area" name="area" required><option value="">Select a sample area</option><option>Demo North</option><option>Demo Central</option><option>Demo South</option></select></div>
         <div class="pair"><label>Preferred date<input name="date" type="date" required></label><label>Preferred time<input name="time" type="time" required></label></div>
         <button class="button" type="submit">Save demo request ↗</button>
         <p id="feedback" role="status"></p>
