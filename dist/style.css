@@ -98,44 +98,81 @@ footer span{font-size:13px}
   font-weight: 700;
 }
 
-/* The gallery stays browseable as a grid when JavaScript is unavailable. */
+/* The featured photo and thumbnails enhance the grid when JavaScript is available. */
+.uploads h2, .uploads > p { text-align: center; }
 .slideshow.is-ready {
-  width: min(100%, 720px);
-  margin: 24px auto 0;
+  max-width: 1000px;
+  margin: 30px auto 0;
+  min-width: 0;
 }
-.slideshow.is-ready .upload-grid {
-  display: block;
-  margin-top: 0;
+.slideshow.is-ready .upload-grid { display: block; margin: 0; }
+.slideshow.is-ready figure {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  border-radius: 18px;
+  background: #f7e6df;
+  overflow: hidden;
 }
 .slideshow.is-ready figure[hidden],
-.slideshow-controls[hidden] {
-  display: none;
-}
-.slideshow.is-ready img {
-  height: clamp(260px, 64vh, 570px);
+.slideshow-controls[hidden],
+.portfolio-thumbnails[hidden] { display: none; }
+.slideshow.is-ready .upload-grid img {
+  height: clamp(280px, 62vh, 560px);
   aspect-ratio: auto;
   object-fit: contain;
+  border-radius: 0;
   background: #38242b;
+}
+.slideshow.is-ready .upload-grid a:focus-visible { outline-offset: -5px; }
+.slideshow.is-ready figcaption {
+  align-self: center;
+  padding: clamp(18px, 4vw, 52px);
+  color: var(--wine);
+  font: 500 clamp(26px, 3.2vw, 52px)/1.12 var(--serif);
+  letter-spacing: -.03em;
 }
 .slideshow-controls {
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 8px;
-  margin-bottom: 12px;
+  margin-block: 14px;
 }
 .slideshow-controls button {
   min-height: 44px;
   padding: 8px 14px;
   border: 1px solid #b98d99;
-  border-radius: 4px;
+  border-radius: 24px;
   background: #fffaf7;
   color: var(--wine);
   font-weight: 700;
 }
 .slideshow-controls button:hover { background: var(--rose); }
-.slide-position {
-  margin: 0;
-  text-align: center;
-  color: var(--muted);
+.slide-position { margin: 0; text-align: center; color: var(--muted); }
+.portfolio-thumbnails {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(60px, 1fr));
+  gap: 8px;
+  overflow-x: auto;
+  padding: 5px;
+}
+.portfolio-thumbnails button {
+  padding: 3px;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  background: var(--rose);
+}
+.portfolio-thumbnails button:hover,
+.portfolio-thumbnails button[aria-current="true"] { border-color: var(--wine); }
+.portfolio-thumbnails button:focus-visible { outline-offset: 0; }
+.portfolio-thumbnails img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 5 / 4;
+  object-fit: cover;
+  border-radius: 7px;
+}
+@media (max-width: 640px) {
+  .slideshow.is-ready figure { grid-template-columns: 1fr; }
+  .slideshow.is-ready figcaption { padding: 16px 20px; }
 }

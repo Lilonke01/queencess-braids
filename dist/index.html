@@ -44,14 +44,9 @@
     </section>
     <!-- The salon photos link to their full-size images. -->
     <section class="shell uploads" id="uploads" aria-labelledby="uploads-title">
-      <h2 id="uploads-title">Uploads</h2>
-      <p class="muted">Select a photo to see the braiding detail up close.</p>
+      <h2 id="uploads-title">Braiding portfolio</h2>
+      <p class="muted">Browse braid colours, lengths and parting details.</p>
       <div class="slideshow" aria-label="Braiding photos">
-        <div class="slideshow-controls" hidden>
-          <button type="button" data-step="-1" aria-label="Previous photo">← <span>Previous</span></button>
-          <p class="slide-position" role="status"></p>
-          <button type="button" data-step="1" aria-label="Next photo"><span>Next</span> →</button>
-        </div>
         <div class="upload-grid">
           <figure>
             <a href="uploads/square-part-braids.jpg" aria-label="View full photo of square-part braids">
@@ -96,6 +91,12 @@
             <figcaption>Side parting detail</figcaption>
           </figure>
         </div>
+        <div class="slideshow-controls" hidden>
+          <button type="button" data-step="-1" aria-label="Previous photo">← <span>Previous</span></button>
+          <p class="slide-position" role="status"></p>
+          <button type="button" data-step="1" aria-label="Next photo"><span>Next</span> →</button>
+        </div>
+        <div class="portfolio-thumbnails" role="group" aria-label="Choose a braid photo" hidden></div>
       </div>
     </section>
     <!-- Collect a style, fictional travel area, and preferred appointment slot. -->
