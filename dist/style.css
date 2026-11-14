@@ -97,3 +97,45 @@ footer span{font-size:13px}
   font-size: 14px;
   font-weight: 700;
 }
+
+/* The gallery stays browseable as a grid when JavaScript is unavailable. */
+.slideshow.is-ready {
+  width: min(100%, 720px);
+  margin: 24px auto 0;
+}
+.slideshow.is-ready .upload-grid {
+  display: block;
+  margin-top: 0;
+}
+.slideshow.is-ready figure[hidden],
+.slideshow-controls[hidden] {
+  display: none;
+}
+.slideshow.is-ready img {
+  height: clamp(260px, 64vh, 570px);
+  aspect-ratio: auto;
+  object-fit: contain;
+  background: #38242b;
+}
+.slideshow-controls {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.slideshow-controls button {
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 1px solid #b98d99;
+  border-radius: 4px;
+  background: #fffaf7;
+  color: var(--wine);
+  font-weight: 700;
+}
+.slideshow-controls button:hover { background: var(--rose); }
+.slide-position {
+  margin: 0;
+  text-align: center;
+  color: var(--muted);
+}
