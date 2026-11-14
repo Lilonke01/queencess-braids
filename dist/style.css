@@ -35,30 +35,7 @@ figure{margin:0}
 figure img{display:block;width:100%;height:clamp(420px,45vw,620px);object-fit:cover;object-position:center 32%;border-radius:48% 48% 5px 5px}
 figcaption{text-align:right;color:var(--muted);font-size:12px;margin-top:7px}
 .styles{background:var(--rose);padding-block:54px 62px}
-/* Keep the sample style cards in a single row when space allows. */
-.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:24px}
 article,form,details{background:#fffaf7;border:1px solid var(--line);border-radius:5px;padding:24px}
-.cards article {
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  padding: 0;
-}
-.style-photo {
-  display: block;
-  width: 100%;
-  aspect-ratio: 4 / 3;
-  object-fit: cover;
-}
-.style-details {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  align-items: flex-start;
-  padding: 20px 24px 24px;
-}
-.style-details .pick { margin-top: auto; }
-.style-details .style-credit { margin: 0 0 6px; font-size: 12px; }
 article p{color:var(--muted)}
 .pick{border:0;background:none;padding:0;text-align:left;text-decoration:underline}
 /* Align the booking instructions and form side by side. */
@@ -82,7 +59,7 @@ footer span{font-size:13px}
   .desktop{display:none}
   .hero{padding-top:26px}
   figure img{height:clamp(330px,110vw,530px)}
-  .cards{grid-template-columns:1fr}
+
 }
 @media(max-width:400px){.top{flex-wrap:wrap;padding-block:12px}.brand{font-size:23px}nav,.actions{gap:12px}.pair{grid-template-columns:1fr}}
 /* Respect the visitor's reduced motion preference. */
@@ -195,4 +172,84 @@ footer span{font-size:13px}
 @media (max-width: 640px) {
   .slideshow.is-ready figure { grid-template-columns: 1fr; }
   .slideshow.is-ready figcaption { padding: 16px 20px; }
+}
+
+/* Use the example photo as the backdrop while keeping the booking copy readable. */
+.style-showcase { position: relative; margin-top: 24px; }
+.style-slides article {
+  position: relative;
+  display: grid;
+  align-items: center;
+  isolation: isolate;
+  min-height: clamp(470px, 69vh, 710px);
+  padding: 64px 0 104px;
+  border: 0;
+  border-radius: 0;
+  background: #38242b;
+  color: white;
+}
+.style-slides article[hidden], .style-controls[hidden] { display: none; }
+.style-slides article::before, .style-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.style-photo { object-fit: cover; object-position: center 40%; z-index: -2; }
+.style-slides article::before {
+  content: "";
+  background: linear-gradient(90deg, #1c1017f5, #25131cd9 32%, #25131c40 100%),
+    linear-gradient(0deg, #1c1017d9, transparent 28%);
+  z-index: -1;
+}
+.style-details h3 { font-size: clamp(48px, 8vw, 110px); letter-spacing: -.045em; max-width: 11ch; }
+.style-details p { color: #fff5f0; max-width: 36ch; font-size: clamp(16px, 2vw, 21px); }
+.style-details .style-credit { font-size: 13px; }
+.style-details .pick {
+  padding: 13px 18px;
+  background: #f7c2a4;
+  border-color: #f7c2a4;
+  color: #321923;
+  text-decoration: none;
+}
+.style-details .pick:hover { background: #ffdac7; }
+.style-showcase :focus-visible { outline-color: white; }
+.style-controls {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.style-controls button {
+  width: 44px;
+  height: 44px;
+  border: 1px solid #fff9;
+  border-radius: 50%;
+  color: white;
+  background: #281824bf;
+}
+.style-controls button:hover { background: var(--wine); }
+.style-dots { display: flex; }
+.style-dots button {
+  position: relative;
+  width: 34px;
+  border-color: transparent;
+  background: transparent;
+}
+.style-dots button::before {
+  content: "";
+  display: block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin: auto;
+  background: #fffb;
+}
+.style-dots button[aria-current="true"]::before { background: #f7c2a4; }
+.style-status { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+@media (max-width: 640px) {
+  .style-slides article { align-items: end; }
+  .style-slides article::before { background: linear-gradient(0deg, #1c1017fa, #25131ccf 46%, #25131c25); }
 }

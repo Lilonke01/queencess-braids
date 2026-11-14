@@ -9,6 +9,7 @@
   <!-- Defer the script until the page elements are ready. -->
   <script src="booking.js" defer></script>
   <script src="slideshow.js" defer></script>
+  <script src="style-showcase.js" defer></script>
 </head>
 <body>
   <header class="shell top">
@@ -30,38 +31,47 @@
       </figure>
     </section>
     <!-- Each style button uses data-style to select the matching option in the form. -->
-    <section class="styles" id="styles">
+    <section class="styles" id="styles" aria-labelledby="styles-title">
       <div class="shell">
         <p class="eyebrow">THE STYLE MENU</p>
-        <h2>Find your next look</h2>
+        <h2 id="styles-title">Find your next look</h2>
         <p class="muted">Sample styles for the booking demo.</p>
-        <div class="cards">
+      </div>
+      <div class="style-showcase">
+        <div class="style-slides" id="style-slides">
           <article>
             <img class="style-photo" src="uploads/square-part-braids.jpg" alt="Black individual braids with square parting" loading="lazy">
-            <div class="style-details">
+            <div class="style-details shell">
               <h3>Knotless braids</h3>
               <p>Individual braids with a gradual feed-in at the root.</p>
-              <button type="button" class="pick" data-style="Knotless braids">Choose knotless braids ↗</button>
+              <button type="button" class="pick button" data-style="Knotless braids">Choose knotless braids ↗</button>
             </div>
           </article>
           <article>
             <img class="style-photo" src="styles/feed-in-cornrows.jpg" alt="Straight-back feed-in cornrows" loading="lazy">
-            <div class="style-details">
+            <div class="style-details shell">
               <p class="style-credit">AI-generated example</p>
               <h3>Feed-in cornrows</h3>
               <p>Braids close to the scalp with extensions added along each row.</p>
-              <button type="button" class="pick" data-style="Feed-in cornrows">Choose feed-in cornrows ↗</button>
+              <button type="button" class="pick button" data-style="Feed-in cornrows">Choose feed-in cornrows ↗</button>
             </div>
           </article>
           <article>
             <img class="style-photo" src="styles/boho-braids.jpg" alt="Long individual boho braids mixed with loose spiral curls" loading="lazy">
-            <div class="style-details">
+            <div class="style-details shell">
               <p class="style-credit">AI-generated example</p>
               <h3>Boho braids</h3>
               <p>Individual braids with loose curls throughout the length.</p>
-              <button type="button" class="pick" data-style="Boho braids">Choose boho braids ↗</button>
+              <button type="button" class="pick button" data-style="Boho braids">Choose boho braids ↗</button>
             </div>
           </article>
+        </div>
+        <div class="style-controls shell" hidden>
+          <button type="button" data-step="-1" aria-label="Previous style">←</button>
+          <div class="style-dots" role="group" aria-label="Choose a style slide"></div>
+          <button type="button" data-step="1" aria-label="Next style">→</button>
+          <button type="button" class="style-play" aria-label="Play slideshow">▶</button>
+          <span class="style-status" role="status"></span>
         </div>
       </div>
     </section>
