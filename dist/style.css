@@ -38,7 +38,27 @@ figcaption{text-align:right;color:var(--muted);font-size:12px;margin-top:7px}
 /* Keep the sample style cards in a single row when space allows. */
 .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:24px}
 article,form,details{background:#fffaf7;border:1px solid var(--line);border-radius:5px;padding:24px}
-article span{color:var(--wine);display:block;font-size:24px;margin-bottom:12px}
+.cards article {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0;
+}
+.style-photo {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+.style-details {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 20px 24px 24px;
+}
+.style-details .pick { margin-top: auto; }
+.style-details .style-credit { margin: 0 0 6px; font-size: 12px; }
 article p{color:var(--muted)}
 .pick{border:0;background:none;padding:0;text-align:left;text-decoration:underline}
 /* Align the booking instructions and form side by side. */
