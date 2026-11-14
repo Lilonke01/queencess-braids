@@ -67,3 +67,33 @@ footer span{font-size:13px}
 @media(max-width:400px){.top{flex-wrap:wrap;padding-block:12px}.brand{font-size:23px}nav,.actions{gap:12px}.pair{grid-template-columns:1fr}}
 /* Respect the visitor's reduced motion preference. */
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+/* Show the uploads in a responsive grid and keep the braids centered. */
+.uploads { padding-block: 56px 20px; }
+.upload-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: 16px;
+  margin-top: 24px;
+}
+.upload-grid figure {
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: #fffaf7;
+}
+.upload-grid a { display: block; }
+.upload-grid img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 4px 4px 0 0;
+}
+.upload-grid figcaption {
+  margin: 0;
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 700;
+}
