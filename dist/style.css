@@ -253,3 +253,6 @@ footer span{font-size:13px}
   .style-slides article { align-items: end; }
   .style-slides article::before { background: linear-gradient(0deg, #1c1017fa, #25131ccf 46%, #25131c25); }
 }
+
+.contact { padding-block: 28px 56px; border-top: 1px solid var(--line); }
+.contact .text-link { overflow-wrap: anywhere; }
