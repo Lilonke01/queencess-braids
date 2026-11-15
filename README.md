@@ -1,6 +1,6 @@
 # Queencess Braids
 
-Queencess Braids is a mobile braiding salon. This assignment prototype lets a client select a style, preferred appointment slot and fictional travel area, then lets a reviewer act as the owner.
+Queencess Braids is a mobile braiding and lash salon. This assignment prototype lets a client select a braid style or lashes, preferred appointment slot and fictional travel area, then lets a reviewer act as the owner.
 
 ## Run locally
 
@@ -14,7 +14,7 @@ Open http://localhost:8080.
 
 ## Reviewer walkthrough
 
-1. Choose a style from the menu. The booking form will preselect it.
+1. Choose a braid style from the menu to preselect it in the form, or select Lashes in the Service field.
 2. Choose a sample area, today or a future date, and a preferred time in SAST. Save the demo request and look for the pending status.
 3. Open **Open salon-owner demo** and accept or decline the request. Check the updated client status beside the form.
 4. Reload to confirm the decision persists. Repeat with another request to exercise the other decision.
