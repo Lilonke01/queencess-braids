@@ -307,3 +307,18 @@ header.top {
 @media (max-width: 760px) {
   header.top { gap: 12px; padding-block: 8px 16px; }
 }
+
+.payments { padding-block: 28px 48px; border-top: 1px solid var(--line); }
+.bank-details { max-width: 650px; margin: 24px 0 0; }
+.bank-details div {
+  display: grid;
+  grid-template-columns: minmax(130px, 1fr) 2fr;
+  gap: 16px;
+  padding-block: 12px;
+  border-bottom: 1px solid var(--line);
+}
+.bank-details dt { color: var(--muted); }
+.bank-details dd { margin: 0; font-weight: 700; overflow-wrap: anywhere; }
+@media (max-width: 400px) {
+  .bank-details div { grid-template-columns: 1fr; gap: 4px; }
+}
