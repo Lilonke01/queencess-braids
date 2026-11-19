@@ -157,11 +157,17 @@
         <div class="field">
           <label for="area">Your area around Plettenberg Bay</label>
           <input id="area" name="area" type="text" maxlength="120" placeholder="Enter your suburb or nearby area" aria-describedby="area-help" required>
-          <small id="area-help">Enter an area or suburb. Arrange the exact meeting point with Alicia on WhatsApp.</small>
+                    <small id="area-help">Enter your area, search Google Maps, then copy the place's share link into the field below.</small>
+          <a id="map-search" class="text-link" href="https://www.google.com/maps/search/?api=1&amp;query=Plettenberg%20Bay" target="_blank" rel="noopener noreferrer">Search location on Google Maps</a>
+        </div>
+        <div class="field">
+          <label for="map-link">Google Maps share link (optional)</label>
+          <input id="map-link" name="mapLink" type="url" maxlength="2000" placeholder="Paste the link from Google Maps">
         </div>
         <div class="pair"><label>Preferred date<input name="date" type="date" required></label><label>Preferred time<input name="time" type="time" required></label></div>
         <button class="button" type="submit">Save demo request ↗</button>
         <p id="feedback" role="status"></p>
+        <a id="send-booking" class="button" hidden target="_blank" rel="noopener noreferrer">Send request and location on WhatsApp</a>
       </form>
     </section>
     <!-- Reviewers can try the owner workflow in the same browser. -->

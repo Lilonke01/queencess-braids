@@ -348,3 +348,5 @@ footer.top { padding-block: 16px; }
 @media (max-width: 560px) {
   .header-social { justify-content: center; }
 }
+
+#send-booking[hidden] { display: none; }

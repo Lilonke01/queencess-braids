@@ -38,6 +38,14 @@ function render(requests) {
     const slot = document.createElement("div");
     slot.textContent = `${request.date} at ${request.time} SAST · ${request.area}`;
     info.append(title, slot);
+    if (request.mapLink) {
+      const map = document.createElement("a");
+      map.href = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(request.mapLink);
+      map.textContent = "View location on Google Maps";
+      map.target = "_blank";
+      map.rel = "noopener noreferrer";
+      info.append(map);
+    }
     row.append(info);
 
     // The owner can decide on a pending request once.
@@ -78,6 +86,14 @@ function save(requests) {
   return true;
 }
 
+// Search the entered area without needing a Maps API key.
+const mapSearch = document.querySelector("#map-search");
+const sendBooking = document.querySelector("#send-booking");
+form.elements.area.addEventListener("input", () => {
+  const area = form.elements.area.value.trim() || "Plettenberg Bay";
+  mapSearch.href = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(area + ", Plettenberg Bay, South Africa");
+});
+form.addEventListener("input", () => { sendBooking.hidden = true; });
 form.elements.date.min = dateInSouthAfrica();
 // Selecting a card fills the style field and moves focus to the form.
 for (const button of document.querySelectorAll(".pick")) {
@@ -109,8 +125,12 @@ form.addEventListener("submit", (event) => {
     return;
   }
   if (save([{ ...data, id: crypto.randomUUID(), status: "Pending" }, ...requests])) {
+    const location = data.mapLink || "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(data.area + ", Plettenberg Bay, South Africa");
+    const message = `Hi Alicia, I'd like to request ${data.style} on ${data.date} at ${data.time} SAST. Area: ${data.area}. Location: ${location}`;
+    sendBooking.href = "https://wa.me/27798418297?text=" + encodeURIComponent(message);
+    sendBooking.hidden = false;
     form.reset();
-    feedback.textContent = "Demo request saved. Open the salon-owner demo below to review it.";
+    feedback.textContent = "Demo request saved in this browser. Use the WhatsApp button to send Alicia your request and location.";
   }
 });
 
