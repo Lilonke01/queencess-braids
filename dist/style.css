@@ -341,3 +341,10 @@ footer.top { padding-block: 16px; }
 @media (max-width: 400px) {
   .bank-details div { grid-template-columns: 1fr; gap: 4px; }
 }
+
+.header-social { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+.facebook-link { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; text-underline-offset: 4px; }
+.facebook-link img { flex: 0 0 24px; }
+@media (max-width: 560px) {
+  .header-social { justify-content: center; }
+}
