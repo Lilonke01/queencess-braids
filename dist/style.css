@@ -264,7 +264,26 @@ footer span{font-size:13px}
   width: 240px;
   height: auto;
 }
-header.top { min-height: 256px; }
+/* Carry the burgundy header background across the full browser width. */
+header.top {
+  min-height: 360px;
+  padding-block: 18px;
+  background: #46102b;
+  color: #fff8f3;
+  border-bottom-color: #ba8957;
+  box-shadow: 0 0 0 100vmax #46102b;
+  clip-path: inset(0 -100vmax);
+}
+header .brand-logo img { width: 340px; max-width: 100%; }
+header .nav-book { color: #fff8f3; border-color: #e6bd91; }
+header nav a:hover { color: #f7c2a4; }
+header :focus-visible { outline-color: #f7c2a4; }
+@media (max-width: 820px) {
+  header.top { flex-direction: column; justify-content: center; padding-block: 20px; gap: 20px; }
+  header .brand-logo { max-width: 100%; }
+  header .brand-logo img { width: min(340px, 100%); }
+  header.top nav { justify-content: center; }
+}
 footer.top { padding-block: 16px; }
 @media (max-width: 640px) {
   .brand-logo img { width: 190px; }
