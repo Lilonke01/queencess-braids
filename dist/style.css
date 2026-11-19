@@ -261,13 +261,13 @@ footer span{font-size:13px}
 .brand-logo { display: block; flex: 0 0 auto; }
 .brand-logo img {
   display: block;
-  width: 120px;
+  width: 240px;
   height: auto;
 }
-header.top { min-height: 136px; }
+header.top { min-height: 256px; }
 footer.top { padding-block: 16px; }
 @media (max-width: 640px) {
-  .brand-logo img { width: 96px; }
+  .brand-logo img { width: 190px; }
   header.top { flex-wrap: wrap; padding-block: 12px; }
   header.top nav { gap: 12px; }
 }
