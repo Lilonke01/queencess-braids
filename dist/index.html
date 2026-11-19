@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Explore Queencess Braids, a mobile braiding and lash salon, and try the appointment booking demo.">
+  <meta name="description" content="Explore Queencess Braids, a mobile braiding and lash salon serving Plettenberg Bay and surrounding areas, and try the appointment booking demo.">
   <title>Queencess Braids | Mobile Braiding and Lashes</title>
   <link rel="stylesheet" href="style.css">
   <!-- Defer the script until the page elements are ready. -->
@@ -22,7 +22,7 @@
       <div class="hero-copy">
         <p class="eyebrow"><span></span> MOBILE BRAIDING AND LASHES</p>
         <h1 id="hero-title">Queen look<br>and <em>princess<br class="desktop"> treatment</em></h1>
-        <p class="intro">Braids and lashes, at your place. Choose a braid style or a lash appointment and request a visit from Queencess Braids.</p>
+        <p class="intro">Braids and lashes, at your place in Plettenberg Bay and surrounding areas. Choose a braid style or a lash appointment and request a visit from Queencess Braids.</p>
         <div class="actions"><a class="button" href="#booking">Request a visit <span>↗</span></a><a class="text-link" href="#styles">Explore styles ↓</a></div>
       </div>
       <figure>
@@ -132,17 +132,21 @@
         <div class="portfolio-thumbnails" role="group" aria-label="Choose a braid photo" hidden></div>
       </div>
     </section>
-    <!-- Collect a style, fictional travel area, and preferred appointment slot. -->
+    <!-- Keep the area field name compatible with existing saved requests. -->
     <section class="shell booking" id="booking">
       <div>
         <p class="eyebrow">MOBILE APPOINTMENTS</p><h2>Request a visit</h2>
-        <p>Choose a braid style or lashes, then select your preferred time and a sample travel area. Use the owner demo to review your request, then return here to see its status.</p>
+        <p>Choose a braid style or lashes, then enter your area around Plettenberg Bay and your preferred time. Use the owner demo to review your request, then return here to see its status.</p>
         <p class="note">Assignment demo. Requests stay in this browser and do not reach the salon. Use fictional details only.</p>
         <p id="latest" role="status"></p>
       </div>
       <form id="request">
         <div class="field"><label for="style">Service</label><select id="style" name="style" required><option value="">Select a service</option><option>Knotless braids</option><option>Feed-in cornrows</option><option>Boho braids</option><option>Lashes</option></select></div>
-        <div class="field"><label for="area">Sample area</label><select id="area" name="area" required><option value="">Select a sample area</option><option>Demo North</option><option>Demo Central</option><option>Demo South</option></select></div>
+        <div class="field">
+          <label for="area">Your area around Plettenberg Bay</label>
+          <input id="area" name="area" type="text" maxlength="120" placeholder="Enter your suburb or nearby area" aria-describedby="area-help" required>
+          <small id="area-help">Enter an area or suburb. Arrange the exact meeting point with Alicia on WhatsApp.</small>
+        </div>
         <div class="pair"><label>Preferred date<input name="date" type="date" required></label><label>Preferred time<input name="time" type="time" required></label></div>
         <button class="button" type="submit">Save demo request ↗</button>
         <p id="feedback" role="status"></p>

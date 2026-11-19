@@ -90,6 +90,12 @@ for (const button of document.querySelectorAll(".pick")) {
 form.addEventListener("submit", (event) => {
   event.preventDefault();
   const data = Object.fromEntries(new FormData(form));
+  data.area = data.area.trim();
+  if (!data.area) {
+    feedback.textContent = "Enter your area around Plettenberg Bay.";
+    form.elements.area.focus();
+    return;
+  }
   if (data.date < dateInSouthAfrica()) {
     feedback.textContent = "Choose today or a future date.";
     form.elements.date.focus();
