@@ -296,3 +296,5 @@ footer.top { padding-block: 16px; }
   header.top { flex-wrap: wrap; padding-block: 12px; }
   header.top nav { gap: 12px; }
 }
+
+.hero figure img { object-position: center 68%; }
