@@ -266,7 +266,7 @@ footer span{font-size:13px}
 }
 /* Carry the white header background across the full browser width. */
 header.top {
-  min-height: 240px;
+  min-height: 0;
   padding-block: 18px;
   background: #ffffff;
   color: var(--ink);
@@ -276,18 +276,18 @@ header.top {
 }
 header .brand-logo { flex-shrink: 1; min-width: 0; }
 header .brand-logo img {
-  width: 600px;
-  height: 200px;
+  width: 280px;
+  height: auto;
   max-width: 100%;
-  object-fit: fill;
+  object-fit: contain;
 }
 header .nav-book { color: var(--wine); border-color: var(--line); }
 header nav a:hover { color: var(--wine); }
 header :focus-visible { outline-color: var(--wine); }
-@media (max-width: 1050px) {
+@media (max-width: 760px) {
   header.top { flex-direction: column; justify-content: center; padding-block: 20px; gap: 20px; }
   header .brand-logo { max-width: 100%; }
-  header .brand-logo img { width: 600px; height: auto; aspect-ratio: 3 / 1; }
+  header .brand-logo img { width: min(280px, 100%); height: auto; }
   header.top nav { justify-content: center; }
 }
 footer.top { padding-block: 16px; }
