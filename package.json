@@ -1,0 +1,9 @@
+{
+  "name": "queencess-braids",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server/index.mjs"
+  },
+  "engines": { "node": ">=24" }
+}
