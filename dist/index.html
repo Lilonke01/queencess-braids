@@ -17,7 +17,8 @@
     <div class="header-content">
       <div class="header-service">
         <p>Mobile braids &amp; lashes <span>· Plettenberg Bay &amp; surrounds</span></p>
-        <div class="header-social"><a href="https://wa.me/27798418297">Chat with Alicia</a><a class="facebook-link" href="https://www.facebook.com/profile.php?id=61596486964368" target="_blank" rel="noopener noreferrer" aria-label="Queencess Braids on Facebook (opens in a new tab)"><img src="facebook.svg" width="24" height="24" alt="">Facebook</a></div>
+        <div class="header-social"><a href="https://wa.me/27798418297" target="_blank" rel="noopener noreferrer">WhatsApp</a><a class="facebook-link" href="https://www.facebook.com/profile.php?id=61596486964368" target="_blank" rel="noopener noreferrer" aria-label="Queencess Braids on Facebook (opens in a new tab)"><img src="facebook.svg" width="24" height="24" alt="">Facebook</a></div>
+        <button id="open-owner-dashboard" class="owner-launch" type="button" aria-controls="owner" aria-expanded="false">Owner dashboard</button>
       </div>
       <nav aria-label="Main navigation">
         <a href="#styles">Styles</a>
@@ -177,8 +178,9 @@
       </form>
     </section>
     <!-- Reviewers can try the owner workflow in the same browser. -->
-    <section class="shell owner" aria-label="Owner demo">
-      <details id="owner"><summary>Open owner dashboard</summary>
+    <section class="shell owner" id="owner" hidden aria-labelledby="owner-title">
+      <div>
+        <h2 id="owner-title" tabindex="-1">Owner dashboard</h2>
         <p class="muted">Sign in to manage bookings and view reports.</p>
         <form id="owner-access">
           <label>Username <input name="username" autocomplete="username" required></label>
@@ -203,7 +205,7 @@
           <p id="owner-review-feedback" role="status"></p>
           <ul id="owner-review-list" class="reviews-list"></ul>
         </section>
-      </details>
+      </div>
     </section>
     <section class="shell payments" id="payments" aria-labelledby="payments-title">
       <h2 id="payments-title">Payments</h2>
@@ -261,6 +263,6 @@
   <footer class="shell top"><a class="brand brand-logo" href="#home"><img src="queencess-logo.png" width="1254" height="1254" alt="Queencess Braids home"></a><div class="footer-details">
     <span>Mobile braiding and lashes · Booking demo</span>
     <span>Created by <a href="https://lilonke-buso-portfolio.lushbull5.chatgpt.site">Lilonke Buso</a></span>
-  </div></footer>
+  </div><div class="footer-social" aria-label="Social links"><a href="https://wa.me/27798418297" target="_blank" rel="noopener noreferrer">WhatsApp</a><a href="https://www.facebook.com/profile.php?id=61596486964368" target="_blank" rel="noopener noreferrer">Facebook</a></div></footer>
 </body>
 </html>

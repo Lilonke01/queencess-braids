@@ -405,6 +405,20 @@ footer.top { padding-block: 16px; }
 
 .footer-details { display: grid; gap: 4px; min-width: 0; }
 .footer-details a { color: var(--wine); text-underline-offset: 3px; }
+/* Keep the private dashboard entry in the header's top-right corner. */
+header.top { position: relative; }
+.header-service { padding-right: 174px; flex-wrap: wrap; }
+.owner-launch { position: absolute; top: 16px; right: 0; border: 1px solid var(--wine); background: var(--wine); color: white; border-radius: 8px; padding: 11px 14px; font: 700 14px/1.4 "DM Sans", Arial, sans-serif; min-height: 44px; }
+.owner-launch:hover { background: #51122b; }
+.footer-social { display: flex; gap: 20px; flex-wrap: wrap; font-weight: 700; color: var(--wine); }
+#owner[hidden] { display: none; }
+#owner-title { scroll-margin-top: 24px; }
+@media (max-width: 560px) {
+  header.top { padding-top: 68px; }
+  .header-service { padding-right: 0; }
+  footer.top { flex-wrap: wrap; }
+  .footer-social { width: 100%; justify-content: center; padding-block: 8px; }
+}
 
 /* Keep the review form in a single column, with large targets for touch and keyboard users. */
 .reviews-layout { grid-template-columns: minmax(0, 700px); gap: 32px; }

@@ -7,6 +7,26 @@ const latest = document.querySelector("#latest");
 const board = document.querySelector("#requests");
 
 const ownerAccess = document.querySelector("#owner-access");
+const ownerPanel = document.querySelector("#owner");
+const ownerLaunch = document.querySelector("#open-owner-dashboard");
+// The header is the single entry point; opening this panel never bypasses login.
+function openOwnerPanel() {
+  ownerPanel.hidden = false;
+  ownerLaunch.setAttribute("aria-expanded", "true");
+  document.querySelector("#owner-title").focus();
+}
+ownerLaunch.addEventListener("click", () => {
+  if (ownerPanel.hidden) openOwnerPanel();
+  else {
+    ownerPanel.hidden = true;
+    ownerLaunch.setAttribute("aria-expanded", "false");
+    ownerLaunch.focus();
+  }
+});
+window.addEventListener("hashchange", () => {
+  if (location.hash === "#owner") openOwnerPanel();
+});
+if (location.hash === "#owner") openOwnerPanel();
 const ownerFeedback = document.querySelector("#owner-feedback");
 const signOut = document.querySelector("#owner-signout");
 const report = document.querySelector("#owner-report");
@@ -240,7 +260,7 @@ async function updateBooking(id, data, button) {
     await loadOwner(key);
     if (key === ownerKey) {
       ownerFeedback.textContent = "Booking updated.";
-      document.querySelector("#owner summary").focus();
+      document.querySelector("#owner-title").focus();
       void loadReport(key);
     }
     await refreshStatus();

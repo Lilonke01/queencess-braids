@@ -29,10 +29,9 @@ for path in sorted(dist.rglob("*")):
             image.save(output, "WEBP", quality=85)
             data = output.getvalue()
         content_type = "image/webp"
-    # The public form uses preset clients and locations, with no bank transfer or messaging links.
+    # Keep public business social links, but use fictional booking clients and omit bank details.
     if key == "index.html":
         page = path.read_text(encoding="utf-8")
-        page = re.sub(r'<div class="header-social">.*?</div>', '', page, flags=re.S)
         page = re.sub(r'<a href="#(?:contact|payments)">[^<]*</a>', '', page)
         page = re.sub(r'<section class="shell (?:payments|contact)".*?</section>', '', page, flags=re.S)
         page = re.sub(r'<div class="pair">\s*<label>Full name.*?</div>', '', page, count=1, flags=re.S)
@@ -42,7 +41,7 @@ for path in sorted(dist.rglob("*")):
         page = re.sub(r'<div class="field">\s*<label for="area">.*?(?=<div class="pair"><label>Preferred date)', fields, page, count=1, flags=re.S)
         page = re.sub(r'<a id="send-booking".*?</a>', '', page)
         page = page.replace("The salon uses your name and phone number to manage your booking. Use fictional details when testing.", "Assignment demo. Choose a fictional client and area below.")
-        if any(marker in page for marker in ("wa.me", "mailto:", "51079054590", 'id="map-link"', 'name="name"')):
+        if any(marker in page for marker in ("mailto:", "51079054590", 'id="map-link"', 'name="name"')):
             raise ValueError("The public demo still contains a private contact, payment or client field.")
         data = page.encode("utf-8")
     if key == "booking.js":
