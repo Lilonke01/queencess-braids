@@ -11,6 +11,7 @@ if (!ownerPassword || ownerPassword.length < 16) {
 }
 const sessions = new Map();
 const loginFailures = new Map();
+// Store appointment data outside the public dist directory. The same database is reopened after a restart.
 const dataDirectory = resolve(process.env.DATA_DIRECTORY || "data");
 mkdirSync(dataDirectory, { recursive: true });
 const db = new DatabaseSync(resolve(dataDirectory, "bookings.sqlite"));
@@ -39,6 +40,7 @@ db.exec(`
   );
   CREATE INDEX IF NOT EXISTS bookings_date_status ON bookings(date, status);
 `);
+// Add columns to older local databases in place so existing booking references stay valid.
 const columns = db.prepare("PRAGMA table_info(bookings)").all().map(({ name }) => name);
 if (!columns.includes("clientId")) db.exec("ALTER TABLE bookings ADD COLUMN clientId INTEGER REFERENCES clients(id)");
 if (!columns.includes("duration")) {
@@ -68,6 +70,7 @@ function ownerSession(request) {
   return request.headers.authorization?.match(/^Bearer ([a-f0-9-]+)$/)?.[1];
 }
 
+// Acquire SQLite's write lock before checking availability. Another process cannot reserve the slot mid-update.
 function transaction(action) {
   db.exec("BEGIN IMMEDIATE");
   try {
@@ -96,6 +99,7 @@ function appointmentStarted(date, time) {
   return Date.parse(date + "T" + time + ":00+02:00") <= Date.now();
 }
 
+// Compare half-open intervals so an appointment can start exactly when the preceding one ends.
 function blocked(date, time, duration, excludeId = "") {
   const start = minutes(time);
   return db.prepare(`
@@ -107,6 +111,7 @@ function blocked(date, time, duration, excludeId = "") {
   });
 }
 
+// Convert local and international spellings to one number before linking repeat visits.
 function normalizePhone(value) {
   const phone = typeof value === "string" ? value.trim().replace(/[\s().-]/g, "") : "";
   if (/^0\d{9}$/.test(phone)) return "+27" + phone.slice(1);
@@ -188,6 +193,7 @@ const server = createServer(async (request, response) => {
         !appointmentStarted(date, time) && !blocked(date, time, duration));
       return reply(response, 200, { available });
     }
+    // The random booking ID lets the client check their own status without exposing contact details.
     const statusMatch = path.match(/^\/api\/bookings\/([a-f0-9-]{36})$/);
     if (statusMatch && request.method === "GET") {
       const booking = db.prepare("SELECT id, status, date, time FROM bookings WHERE id=?").get(statusMatch[1]);
@@ -195,6 +201,7 @@ const server = createServer(async (request, response) => {
       return reply(response, 200, booking);
     }
     if (path.startsWith("/api/owner/")) {
+      // Issue a short-lived token after checking credentials. The browser never stores the password.
       if (path === "/api/owner/login" && request.method === "POST") {
         const credentials = await body(request);
         const now = Date.now();
@@ -231,6 +238,7 @@ const server = createServer(async (request, response) => {
         if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(month)) {
           return reply(response, 400, { error: "Enter a month in YYYY-MM format." });
         }
+        // Report by the scheduled appointment date. Unique-client totals include only completed visits.
         const rows = db.prepare(`
           SELECT style, status, COUNT(*) AS count
           FROM bookings WHERE date BETWEEN ? AND ?
@@ -267,6 +275,7 @@ const server = createServer(async (request, response) => {
             db.prepare("UPDATE bookings SET date=?, time=? WHERE id=?").run(date, time, id);
             return { code: 200 };
           }
+          // Only open bookings can be cancelled. Attendance is recorded after an approved slot starts.
           const status = input?.status;
           if (!["Accepted", "Declined", "Completed", "Cancelled", "No-show"].includes(status)) {
             return { code: 400, error: "Choose a valid booking action." };

@@ -14,7 +14,9 @@ const reportFilter = document.querySelector("#report-filter");
 const reportMonth = reportFilter.elements.month;
 const reportSummary = document.querySelector("#report-summary");
 const reportServices = document.querySelector("#report-services");
+// Track in-flight report requests so an earlier month cannot overwrite the latest selection.
 let reportRequest = 0;
+// Keep the owner session token in memory. Local storage only remembers the client's booking reference.
 let ownerKey = "";
 let latestId;
 try {
@@ -23,6 +25,7 @@ try {
   // The status is still available while this page stays open.
 }
 
+// Use the same origin for the website and its API. Include the owner token only on protected requests.
 async function api(path, { method = "GET", data, key } = {}) {
   const headers = {};
   if (data) headers["Content-Type"] = "application/json";
@@ -175,6 +178,7 @@ function render(requests) {
     }
     row.append(info);
 
+    // Match the actions shown to the owner to the booking's current status and SAST appointment time.
     const actions = [];
     const started = Date.parse(request.date + "T" + request.time + ":00+02:00") <= Date.now();
     const open = ["Pending", "Accepted"].includes(request.status);
@@ -322,6 +326,7 @@ form.addEventListener("submit", async (event) => {
   }
 });
 
+// Pick up owner decisions made on another device without requiring the client to reload.
 window.addEventListener("focus", refreshStatus);
 window.setInterval(refreshStatus, 15000);
 refreshStatus();

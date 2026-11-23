@@ -350,3 +350,32 @@ footer.top { padding-block: 16px; }
 }
 
 #send-booking[hidden] { display: none; }
+
+/* Keep booking fields and owner controls usable on narrow touch screens. */
+#request .pair { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+#request .pair > label,
+#owner label { min-width: 0; }
+#owner form { display: grid; gap: 10px; justify-items: start; }
+#owner button,
+#check-availability {
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid #b98d99;
+  border-radius: 4px;
+  color: var(--wine);
+  background: white;
+}
+#owner summary { padding-block: 12px; }
+#owner input,
+#request input,
+#request select { min-height: 44px; font-size: max(1rem, 16px); }
+.request-row > * { min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
+.request-row button { margin-block: 4px; }
+
+@media (max-width: 560px) {
+  #request .pair { grid-template-columns: minmax(0, 1fr); }
+  #owner-access > label,
+  #report-filter > label,
+  .request-row form > label,
+  .request-row > details { width: 100%; }
+}

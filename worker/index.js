@@ -1,4 +1,5 @@
 
+// Hosted reviewer API. The local Node server uses a separate database and accepts ordinary contact input.
 const durations = new Map([["Knotless braids",180],["Feed-in cornrows",120],["Boho braids",240],["Lashes",90]]);
 const reserved = "('Accepted','Completed','No-show')";
 const states = ["Pending","Accepted","Declined","Completed","Cancelled","No-show"];
@@ -12,6 +13,7 @@ function slot(date,time,duration) {
     new Date(date).toISOString().slice(0,10)===date && /^([01]\d|2[0-3]):[0-5]\d$/.test(time) &&
     minutes(time)+duration<=1440 && startsAt(date,time)>Date.now();
 }
+// The overlap query runs inside INSERT or UPDATE, so availability and the write happen atomically in D1.
 const overlap = `SELECT 1 FROM bookings WHERE date=? AND status IN ${reserved}
   AND id!=? AND starts<? AND starts+duration>?`;
 async function api(request,env,url) {
@@ -35,6 +37,7 @@ async function api(request,env,url) {
        !["Demo Area A","Demo Area B","Demo Area C"].includes(area) || !slot(date,time,duration)) {
       return fail("Choose the supplied fictional client and area, a service, and a future appointment time.",400);
     }
+    // The public demo accepts only preset phone numbers and areas, and derives the fictional name.
     const id=crypto.randomUUID(), starts=minutes(time);
     const name="Demo Client "+phone.slice(-2);
     const booking=await sql(`INSERT INTO bookings (id,style,area,date,time,starts,duration,clientName,clientPhone,createdAt)
@@ -63,6 +66,7 @@ async function api(request,env,url) {
     if(username!==(env.OWNER_USERNAME||"owner") || typeof password!=="string" || await hash(password)!==await hash(env.OWNER_PASSWORD)) {
       return fail("Incorrect username or password.",401);
     }
+    // Store only a hash of the session token in D1 so it works across Worker instances.
     const token=crypto.randomUUID();
     await sql("DELETE FROM sessions WHERE expires<=?",now).run();
     await sql("INSERT INTO sessions (token,expires) VALUES (?,?)",await hash(token),now+28800000).run();
@@ -92,6 +96,7 @@ async function api(request,env,url) {
       totals[status]+=count;
       if(status==="Completed") completedByService.push({style,count});
     }
+    // The normalized fictional phone identifies a returning client across multiple visits.
     const {uniqueClients}=await sql("SELECT count(DISTINCT clientPhone) AS uniqueClients FROM bookings WHERE status='Completed' AND date BETWEEN ? AND ?",...limits).first();
     return json({month,totals,completedByService,uniqueClients,completedWithoutClient:0});
   }
@@ -124,12 +129,14 @@ async function update(sql,booking,input) {
   }
   const starts=minutes(newTime);
   const checkSlot=rescheduling||status==="Accepted";
+  // Match the original booking state to avoid overwriting a concurrent owner decision or reschedule.
   const result=await sql(`UPDATE bookings SET status=?,date=?,time=?,starts=?
     WHERE id=? AND status=? AND date=? AND time=? ${checkSlot?`AND NOT EXISTS (${overlap})`:""}
     RETURNING *`,status,newDate,newTime,starts,id,previous,date,time,
     ...(checkSlot?[newDate,id,starts+duration,starts]:[])).first();
   return result ?? fail("That time overlaps another appointment or the booking changed. Refresh and try again.",409);
 }
+// Cap request bytes while streaming, before parsing or allocating a large JSON body.
 async function body(request) {
   const reader=request.body?.getReader();
   if(!reader) throw fail("Send a JSON object.",400);
@@ -166,6 +173,7 @@ export default {
         return fail("Booking service is unavailable.",500);
       }
     }
+    // The build embeds the sanitized public assets. Only exact paths in that manifest are served.
     const path=url.pathname==="/"?"/index.html":url.pathname;
     const asset=Object.hasOwn(ASSETS,path)?ASSETS[path]:null;
     if(!asset) return new Response("Not found",{status:404});

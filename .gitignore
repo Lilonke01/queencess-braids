@@ -2,3 +2,6 @@ data/
 .env
 
 dist/server/
+
+# Local Netlify project metadata
+.netlify/

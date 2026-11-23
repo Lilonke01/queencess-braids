@@ -9,6 +9,7 @@ from PIL import Image
 
 root = Path(__file__).resolve().parent.parent
 dist = root / "dist"
+# Build a reviewer-only asset manifest without changing the local website files.
 assets = {}
 for path in sorted(dist.rglob("*")):
     if not path.is_file() or path.suffix.lower() not in {".html", ".css", ".js", ".svg", ".png", ".jpg"}:
@@ -25,6 +26,7 @@ for path in sorted(dist.rglob("*")):
             image.save(output, "WEBP", quality=85)
             data = output.getvalue()
         content_type = "image/webp"
+    # The public form uses preset clients and locations, with no bank transfer or messaging links.
     if key == "index.html":
         page = path.read_text(encoding="utf-8")
         page = re.sub(r'<div class="header-social">.*?</div>', '', page, flags=re.S)
@@ -52,6 +54,7 @@ for path in sorted(dist.rglob("*")):
         data = source.encode("utf-8")
     assets["/" + key] = {"data": b64encode(data).decode("ascii"), "type": content_type}
 
+# Sites loads the generated Worker entry point. The asset manifest is bundled before the handler.
 server = dist / "server"
 server.mkdir(exist_ok=True)
 entry = server / "index.js"
