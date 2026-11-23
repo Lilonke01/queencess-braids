@@ -4,8 +4,11 @@ from pathlib import Path
 import json
 import mimetypes
 import re
+import sys
 
-from PIL import Image
+netlify = sys.argv[1:] == ["--netlify"]
+if not netlify:
+    from PIL import Image
 
 root = Path(__file__).resolve().parent.parent
 dist = root / "dist"
@@ -19,7 +22,7 @@ for path in sorted(dist.rglob("*")):
         continue
     data = path.read_bytes()
     content_type = mimetypes.guess_type(path.name)[0]
-    if path.suffix in {".png", ".jpg"}:
+    if not netlify and path.suffix in {".png", ".jpg"}:
         with Image.open(path) as image:
             image.thumbnail((1100, 1100))
             output = BytesIO()
@@ -52,7 +55,16 @@ for path in sorted(dist.rglob("*")):
         source = source[:start] + '    form.reset();\n    feedback.textContent = "Demo booking submitted.";\n' + source[end:]
         source = source.replace('document.createElement("a");\n      contact.href = "tel:" + request.clientPhone;', 'document.createElement("span");')
         data = source.encode("utf-8")
+    if netlify:
+        target = root / "netlify-dist" / key
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(data)
+        continue
     assets["/" + key] = {"data": b64encode(data).decode("ascii"), "type": content_type}
+
+if netlify:
+    print("Built Netlify reviewer site in netlify-dist.")
+    sys.exit(0)
 
 # Sites loads the generated Worker entry point. The asset manifest is bundled before the handler.
 server = dist / "server"

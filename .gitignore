@@ -5,3 +5,5 @@ dist/server/
 
 # Local Netlify project metadata
 .netlify/
+
+netlify-dist/

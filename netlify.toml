@@ -1,0 +1,10 @@
+[build]
+  command = "python worker/build.py --netlify"
+  publish = "netlify-dist"
+  functions = "netlify/functions"
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/booking-api/:splat"
+  status = 200
+  force = true

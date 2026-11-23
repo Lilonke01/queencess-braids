@@ -29,3 +29,7 @@ Monthly reports use the scheduled appointment month and count unique clients amo
 Deploy the Dockerfile on a host that runs a long-lived container. Use one instance, mount persistent storage at /app/data, and route public HTTPS to port 3000. Set OWNER_USERNAME and OWNER_PASSWORD in the host's secret settings. Configure the health check at /api/health. Back up the SQLite database with the host's volume backup or SQLite's backup API. The existing static site configuration cannot run this backend.
 
 Verify the public URL on a phone with fictional data, including client submission, owner sign-in, approval and monthly reporting, before using it for real bookings.
+
+## Netlify reviewer site
+
+Import the private GitHub repository into a Netlify Free team and use the main branch. The checked-in netlify.toml builds the public demo, with fictional test fields, to netlify-dist. Set project visibility to Public for customer access. The Netlify function forwards booking requests to the existing hosted API, which maintains the shared demo database and protects the owner dashboard with a login.
