@@ -1,15 +1,131 @@
 "use strict";
 
-// Store demo requests in this browser so reviewers can reload and keep their progress.
-const storageKey = "queencess-bookings-v1";
+const storageKey = "queencess-latest-booking";
 const form = document.querySelector("#request");
 const feedback = document.querySelector("#feedback");
 const latest = document.querySelector("#latest");
 const board = document.querySelector("#requests");
 
-function readRequests() {
-  return JSON.parse(localStorage.getItem(storageKey) ?? "[]");
+const ownerAccess = document.querySelector("#owner-access");
+const ownerFeedback = document.querySelector("#owner-feedback");
+const signOut = document.querySelector("#owner-signout");
+const report = document.querySelector("#owner-report");
+const reportFilter = document.querySelector("#report-filter");
+const reportMonth = reportFilter.elements.month;
+const reportSummary = document.querySelector("#report-summary");
+const reportServices = document.querySelector("#report-services");
+let reportRequest = 0;
+let ownerKey = "";
+let latestId;
+try {
+  latestId = localStorage.getItem(storageKey);
+} catch {
+  // The status is still available while this page stays open.
 }
+
+async function api(path, { method = "GET", data, key } = {}) {
+  const headers = {};
+  if (data) headers["Content-Type"] = "application/json";
+  if (key) headers.Authorization = "Bearer " + key;
+  const response = await fetch(path, { method, headers, body: data && JSON.stringify(data) });
+  if (!response.headers.get("content-type")?.includes("application/json")) {
+    throw new Error("Open the website through the booking server.");
+  }
+  const result = await response.json();
+  if (!response.ok) throw new Error(result.error);
+  return result;
+}
+
+async function refreshStatus() {
+  const id = latestId;
+  if (!id) return;
+  try {
+    const { status, date, time } = await api("/api/bookings/" + encodeURIComponent(id));
+    if (id === latestId) latest.textContent = `Latest booking: ${status} · ${date} at ${time} SAST.`;
+  } catch (error) {
+    if (id === latestId) latest.textContent = "Status unavailable. " + error.message;
+  }
+}
+
+async function loadOwner(key) {
+  const { bookings } = await api("/api/owner/bookings", { key });
+  if (key === ownerKey) render(bookings);
+}
+
+async function loadReport(key) {
+  const request = ++reportRequest;
+  reportSummary.textContent = "Loading report…";
+  reportServices.replaceChildren();
+  try {
+    const result = await api("/api/owner/reports/monthly?month=" + encodeURIComponent(reportMonth.value), { key });
+    if (key !== ownerKey || request !== reportRequest) return;
+    const { Completed, Pending, Accepted, Declined } = result.totals;
+    reportSummary.textContent = `${result.month} · ${Completed} completed appointments · ${result.uniqueClients} unique clients · ${Pending} pending · ${Accepted} approved · ${Declined} declined · ${result.totals.Cancelled} cancelled · ${result.totals["No-show"]} no-shows.`;
+    if (result.completedWithoutClient) {
+      reportSummary.textContent += ` ${result.completedWithoutClient} older completed bookings have no client record.`;
+    }
+    for (const { style, count } of result.completedByService) {
+      const item = document.createElement("li");
+      item.textContent = `${style}: ${count} completed`;
+      reportServices.append(item);
+    }
+  } catch (error) {
+    if (key === ownerKey && request === reportRequest) reportSummary.textContent = error.message;
+  }
+}
+
+reportMonth.value = dateInSouthAfrica().slice(0, 7);
+reportFilter.addEventListener("submit", (event) => {
+  event.preventDefault();
+  if (ownerKey) void loadReport(ownerKey);
+});
+
+ownerAccess.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const button = ownerAccess.querySelector('button[type="submit"]');
+  const credentials = Object.fromEntries(new FormData(ownerAccess));
+  button.disabled = true;
+  let key;
+  const previousKey = ownerKey;
+  ownerKey = "";
+  ownerAccess.reset();
+  if (previousKey) void api("/api/owner/logout", { method: "POST", key: previousKey }).catch(() => {});
+  report.hidden = true;
+  board.replaceChildren();
+  signOut.hidden = true;
+  ownerFeedback.textContent = "Signing in…";
+  try {
+    ({ token: key } = await api("/api/owner/login", { method: "POST", data: credentials }));
+    ownerKey = key;
+    await loadOwner(key);
+    signOut.hidden = false;
+    if (key === ownerKey) {
+      ownerFeedback.textContent = "";
+      report.hidden = false;
+      await loadReport(key);
+    }
+  } catch (error) {
+    ownerKey = "";
+    signOut.hidden = true;
+    ownerFeedback.textContent = error.message;
+  } finally {
+    button.disabled = false;
+  }
+});
+
+signOut.addEventListener("click", () => {
+  const key = ownerKey;
+  ownerKey = "";
+  void api("/api/owner/logout", { method: "POST", key }).catch(() => {});
+  signOut.hidden = true;
+  report.hidden = true;
+  reportRequest++;
+  reportSummary.textContent = "";
+  reportServices.replaceChildren();
+  ownerAccess.reset();
+  ownerFeedback.textContent = "";
+  board.replaceChildren();
+});
 
 // Use the salon time zone when deciding which appointment dates are in the past.
 function dateInSouthAfrica() {
@@ -20,12 +136,11 @@ function dateInSouthAfrica() {
   return [get("year"), get("month"), get("day")].join("-");
 }
 
-// Update the client status and rebuild the owner panel from the saved requests.
+// Rebuild the owner panel from the saved requests.
 function render(requests) {
   board.replaceChildren();
-  latest.textContent = requests.length ? `Latest demo request: ${requests[0].status}.` : "";
   if (!requests.length) {
-    board.textContent = "No requests yet. Save a demo request above to get started.";
+    board.textContent = "No requests yet.";
     return;
   }
 
@@ -38,53 +153,112 @@ function render(requests) {
     const slot = document.createElement("div");
     slot.textContent = `${request.date} at ${request.time} SAST · ${request.area}`;
     info.append(title, slot);
+    if (request.clientPhone) {
+      const contact = document.createElement("a");
+      contact.href = "tel:" + request.clientPhone;
+      contact.textContent = request.clientName + " · " + request.clientPhone;
+      const line = document.createElement("div");
+      line.append(contact);
+      info.append(line);
+    } else {
+      const note = document.createElement("div");
+      note.textContent = "No client details on this older booking.";
+      info.append(note);
+    }
     if (request.mapLink) {
       const map = document.createElement("a");
-      map.href = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(request.mapLink);
-      map.textContent = "View location on Google Maps";
+      map.href = request.mapLink;
+      map.textContent = "Open map link";
       map.target = "_blank";
       map.rel = "noopener noreferrer";
       info.append(map);
     }
     row.append(info);
 
-    // The owner can decide on a pending request once.
+    const actions = [];
+    const started = Date.parse(request.date + "T" + request.time + ":00+02:00") <= Date.now();
+    const open = ["Pending", "Accepted"].includes(request.status);
     if (request.status === "Pending") {
+      if (!started) actions.push(["Approve", "Accepted"]);
+      actions.push(["Decline", "Declined"]);
+    }
+    if (request.status === "Accepted" && started) {
+      actions.push(["Mark completed", "Completed"], ["Mark no-show", "No-show"]);
+    }
+    if (open) actions.push(["Cancel booking", "Cancelled"]);
+    if (actions.length) {
       const controls = document.createElement("div");
-      for (const decision of ["Accept", "Decline"]) {
+      for (const [label, status] of actions) {
         const button = document.createElement("button");
         button.type = "button";
-        button.textContent = decision;
-        button.setAttribute("aria-label", `${decision} ${request.style} on ${request.date} at ${request.time}`);
-        button.addEventListener("click", () => {
-          // Reload the saved request before applying a decision in case another tab changed it.
-          const requests = readRequests();
-          const current = requests.find((entry) => entry.id === request.id);
-          if (current?.status === "Pending") {
-            current.status = decision === "Accept" ? "Accepted" : "Declined";
-            save(requests);
-          }
-          document.querySelector("#owner summary").focus();
-        });
+        button.textContent = label;
+        button.setAttribute("aria-label", `${label} for ${request.style} on ${request.date} at ${request.time}`);
+        button.addEventListener("click", () => updateBooking(request.id, { status }, button));
         controls.append(button);
       }
       row.append(controls);
+    }
+    if (open) {
+      const editor = document.createElement("details");
+      const summary = document.createElement("summary");
+      summary.textContent = "Reschedule";
+      const schedule = document.createElement("form");
+      schedule.innerHTML = '<label>New date <input name="date" type="date" required></label> ' +
+        '<label>New time (SAST) <input name="time" type="time" required></label> ' +
+        '<button type="submit">Save new time</button>';
+      schedule.elements.date.min = dateInSouthAfrica();
+      schedule.elements.date.value = request.date;
+      schedule.elements.time.value = request.time;
+      schedule.addEventListener("submit", (event) => {
+        event.preventDefault();
+        void updateBooking(request.id, { action: "reschedule", ...Object.fromEntries(new FormData(schedule)) }, event.submitter);
+      });
+      editor.append(summary, schedule);
+      row.append(editor);
     }
     board.append(row);
   }
 }
 
-// Update the screen only after the browser successfully stores the change.
-function save(requests) {
+async function updateBooking(id, data, button) {
+  const key = ownerKey;
+  button.disabled = true;
+  ownerFeedback.textContent = "";
   try {
-    localStorage.setItem(storageKey, JSON.stringify(requests));
-  } catch {
-    feedback.textContent = "This browser could not save the change. Check your browser storage settings.";
-    return false;
+    await api("/api/owner/bookings/" + id, { method: "PATCH", key, data });
+    await loadOwner(key);
+    if (key === ownerKey) {
+      ownerFeedback.textContent = "Booking updated.";
+      document.querySelector("#owner summary").focus();
+      void loadReport(key);
+    }
+    await refreshStatus();
+  } catch (error) {
+    if (key === ownerKey) ownerFeedback.textContent = error.message;
+  } finally {
+    button.disabled = false;
   }
-  render(requests);
-  return true;
 }
+
+const checkAvailability = document.querySelector("#check-availability");
+checkAvailability.addEventListener("click", async () => {
+  const slot = new URLSearchParams();
+  for (const field of ["style", "date", "time"]) {
+    const input = form.elements[field];
+    if (!input.reportValidity()) return;
+    slot.set(field, input.value);
+  }
+  checkAvailability.disabled = true;
+  try {
+    const { available } = await api("/api/availability?" + slot);
+    const current = [...slot].every(([field, value]) => form.elements[field].value === value);
+    if (current) feedback.textContent = available ? "This slot is available to request." : "This slot is unavailable. Choose another time.";
+  } catch (error) {
+    feedback.textContent = error.message;
+  } finally {
+    checkAvailability.disabled = false;
+  }
+});
 
 // Search the entered area without needing a Maps API key.
 const mapSearch = document.querySelector("#map-search");
@@ -93,7 +267,7 @@ form.elements.area.addEventListener("input", () => {
   const area = form.elements.area.value.trim() || "Plettenberg Bay";
   mapSearch.href = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(area + ", Plettenberg Bay, South Africa");
 });
-form.addEventListener("input", () => { sendBooking.hidden = true; });
+form.addEventListener("input", () => { sendBooking.hidden = true; feedback.textContent = ""; });
 form.elements.date.min = dateInSouthAfrica();
 // Selecting a card fills the style field and moves focus to the form.
 for (const button of document.querySelectorAll(".pick")) {
@@ -103,7 +277,7 @@ for (const button of document.querySelectorAll(".pick")) {
   });
 }
 
-form.addEventListener("submit", (event) => {
+form.addEventListener("submit", async (event) => {
   event.preventDefault();
   const data = Object.fromEntries(new FormData(form));
   data.area = data.area.trim();
@@ -117,25 +291,37 @@ form.addEventListener("submit", (event) => {
     form.elements.date.focus();
     return;
   }
-  const requests = readRequests();
-  // Declined requests can be submitted again with the same appointment details.
-  if (requests.some((entry) => entry.status !== "Declined" &&
-    ["style", "area", "date", "time"].every((field) => entry[field] === data[field]))) {
-    feedback.textContent = "A request for these details already exists.";
-    return;
-  }
-  if (save([{ ...data, id: crypto.randomUUID(), status: "Pending" }, ...requests])) {
+  const submit = form.querySelector('button[type="submit"]');
+  submit.disabled = true;
+  feedback.textContent = "Submitting request…";
+  try {
+    const { id, status } = await api("/api/bookings", { method: "POST", data });
+    latestId = id;
+    latest.textContent = "Latest booking: " + status + ".";
+    try {
+      localStorage.setItem(storageKey, id);
+    } catch {
+      // The booking has already been saved on the server.
+    }
     const location = data.mapLink || "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(data.area + ", Plettenberg Bay, South Africa");
-    const message = `Hi Alicia, I'd like to request ${data.style} on ${data.date} at ${data.time} SAST. Area: ${data.area}. Location: ${location}`;
+    const message = `Hi Alicia, this is ${data.name}. I'd like to request ${data.style} on ${data.date} at ${data.time} SAST. Area: ${data.area}. Location: ${location}`;
     sendBooking.href = "https://wa.me/27798418297?text=" + encodeURIComponent(message);
     sendBooking.hidden = false;
     form.reset();
-    feedback.textContent = "Demo request saved in this browser. Use the WhatsApp button to send Alicia your request and location.";
+    feedback.textContent = "Demo request submitted. You can also send the details on WhatsApp.";
+    if (ownerKey) {
+      const key = ownerKey;
+      Promise.all([loadOwner(key), loadReport(key)]).catch((error) => {
+        if (key === ownerKey) ownerFeedback.textContent = error.message;
+      });
+    }
+  } catch (error) {
+    feedback.textContent = error.message;
+  } finally {
+    submit.disabled = false;
   }
 });
 
-// Refresh the display when another tab changes the stored requests.
-window.addEventListener("storage", (event) => {
-  if (event.key === storageKey || event.key === null) render(readRequests());
-});
-render(readRequests());
+window.addEventListener("focus", refreshStatus);
+window.setInterval(refreshStatus, 15000);
+refreshStatus();

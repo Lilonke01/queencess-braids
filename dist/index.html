@@ -148,11 +148,15 @@
     <section class="shell booking" id="booking">
       <div>
         <p class="eyebrow">MOBILE APPOINTMENTS</p><h2>Request a visit</h2>
-        <p>Choose a braid style or lashes, then enter your area around Plettenberg Bay and your preferred time. Use the owner demo to review your request, then return here to see its status.</p>
-        <p class="note">Assignment demo. Requests stay in this browser and do not reach the salon. Use fictional details only.</p>
+        <p>Choose a braid style or lashes, then enter your area around Plettenberg Bay and your preferred time. Your latest request status appears below the form.</p>
+        <p class="note">Assignment demo. The salon uses your name and phone number to manage your booking. Use fictional details when testing.</p>
         <p id="latest" role="status"></p>
       </div>
       <form id="request">
+        <div class="pair">
+          <label>Full name <input name="name" autocomplete="name" maxlength="100" required></label>
+          <label>Phone number <input name="phone" type="tel" autocomplete="tel" maxlength="30" placeholder="e.g. 082 123 4567" required></label>
+        </div>
         <div class="field"><label for="style">Service</label><select id="style" name="style" required><option value="">Select a service</option><option>Knotless braids</option><option>Feed-in cornrows</option><option>Boho braids</option><option>Lashes</option></select></div>
         <div class="field">
           <label for="area">Your area around Plettenberg Bay</label>
@@ -165,15 +169,33 @@
           <input id="map-link" name="mapLink" type="url" maxlength="2000" placeholder="Paste the link from Google Maps">
         </div>
         <div class="pair"><label>Preferred date<input name="date" type="date" required></label><label>Preferred time<input name="time" type="time" required></label></div>
-        <button class="button" type="submit">Save demo request ↗</button>
+        <button id="check-availability" type="button">Check availability</button>
+        <button class="button" type="submit">Submit booking request ↗</button>
         <p id="feedback" role="status"></p>
         <a id="send-booking" class="button" hidden target="_blank" rel="noopener noreferrer">Send request and location on WhatsApp</a>
       </form>
     </section>
     <!-- Reviewers can try the owner workflow in the same browser. -->
     <section class="shell owner" aria-label="Owner demo">
-      <details id="owner"><summary>Open salon-owner demo</summary>
-        <p class="muted">Review requests created in this browser. This demo is open to reviewers.</p>
+      <details id="owner"><summary>Open owner dashboard</summary>
+        <p class="muted">Sign in to manage bookings and view reports.</p>
+        <form id="owner-access">
+          <label>Username <input name="username" autocomplete="username" required></label>
+          <label>Password <input name="password" type="password" autocomplete="current-password" required></label>
+          <button type="submit">Sign in</button>
+          <button id="owner-signout" type="button" hidden>Sign out</button>
+        </form>
+        <p id="owner-feedback" role="status"></p>
+        <section id="owner-report" hidden aria-labelledby="report-title">
+          <h3 id="report-title">Monthly booking report</h3>
+          <form id="report-filter">
+            <label for="report-month">Appointment month (YYYY-MM)</label>
+            <input id="report-month" name="month" type="month" pattern="[0-9]{4}-(0[1-9]|1[0-2])" required>
+            <button type="submit">View report</button>
+          </form>
+          <p id="report-summary" role="status"></p>
+          <ul id="report-services"></ul>
+        </section>
         <div id="requests"></div>
       </details>
     </section>

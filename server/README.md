@@ -1,29 +1,31 @@
-# Backend development
+# Booking backend
 
-The Node.js backend stores bookings in SQLite and serves the existing website at the same address. Node 24 or newer is required. There are no npm dependencies.
+The Node.js 24 server serves the website and booking API from the same origin. SQLite stores bookings and client records in data/bookings.sqlite by default. There are no npm dependencies.
 
-## Start
+## Run locally
 
-In PowerShell, set a private owner key and start the server.
+Set a strong password in your environment, then run:
 
 ```powershell
-$env:OWNER_API_KEY = 'replace-with-a-private-secret-at-least-32-characters-long'
+$env:OWNER_USERNAME = 'owner'
+$env:OWNER_PASSWORD = 'replace-with-a-unique-password-of-at-least-16-characters'
 npm start
 ```
 
-Open http://127.0.0.1:3000. The website currently uses its browser demo flow. The API is ready for the next frontend integration.
+Open http://127.0.0.1:3000 and sign in under **Open owner dashboard**. The previous OWNER_API_KEY setting can still supply the local login password. The browser holds an expiring session token in memory, so reload requires signing in again.
 
-## API
+## Booking workflow
 
-- GET /api/health returns server health.
-- POST /api/bookings accepts JSON with style, area, date, time and an optional mapLink. Dates use YYYY-MM-DD, times use HH:mm in South African time, and map links must use HTTPS. It returns the booking ID and Pending status.
-- GET /api/owner/bookings returns the latest 100 bookings.
-- PATCH /api/owner/bookings/{id} accepts JSON with status set to Accepted or Declined.
+Clients provide a name and phone number. South African local and international forms of the same number share a client record. The availability check and approval both account for overlapping appointments. Pending bookings do not reserve a slot.
 
-Owner endpoints require an Authorization header containing Bearer followed by OWNER_API_KEY. Keep this key on the server or in a trusted owner client. Do not embed it in the public website.
+The scheduler assumes one owner and uses 180 minutes for knotless braids, 120 for feed-in cornrows, 240 for boho braids, and 90 for lashes. Confirm these estimates with the owner before going live. Appointments use South African time and must finish by midnight.
 
-The database lives in data/bookings.sqlite and is excluded from Git. DATA_DIRECTORY can select a persistent storage directory. PORT defaults to 3000 and HOST defaults to 127.0.0.1.
+The owner can reschedule or cancel open bookings and mark approved bookings completed or no-show after their scheduled start. Clients can see the new date, time, and status on their original booking page. The owner can call the client from the dashboard to confirm changes.
 
-## Remaining integration
+Monthly reports use the scheduled appointment month and count unique clients among completed bookings by normalized phone number. Older bookings without a client record still contribute to appointment totals.
 
-Connect the booking form to POST /api/bookings and build an authenticated owner interface. Add owner sessions and deployment configuration before enabling the backend on the hosted site. Existing browser demo records remain on their original devices. Use fictional locations and test data during assignment review.
+## Deploy
+
+Deploy the Dockerfile on a host that runs a long-lived container. Use one instance, mount persistent storage at /app/data, and route public HTTPS to port 3000. Set OWNER_USERNAME and OWNER_PASSWORD in the host's secret settings. Configure the health check at /api/health. Back up the SQLite database with the host's volume backup or SQLite's backup API. The existing static site configuration cannot run this backend.
+
+Verify the public URL on a phone with fictional data, including client submission, owner sign-in, approval and monthly reporting, before using it for real bookings.
