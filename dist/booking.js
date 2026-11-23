@@ -94,6 +94,9 @@ ownerAccess.addEventListener("submit", async (event) => {
   ownerAccess.reset();
   if (previousKey) void api("/api/owner/logout", { method: "POST", key: previousKey }).catch(() => {});
   report.hidden = true;
+  ownerReviews.hidden = true;
+  ownerReviewList.replaceChildren();
+  ownerReviewFeedback.textContent = "";
   board.replaceChildren();
   signOut.hidden = true;
   ownerFeedback.textContent = "Signing in…";
@@ -105,7 +108,8 @@ ownerAccess.addEventListener("submit", async (event) => {
     if (key === ownerKey) {
       ownerFeedback.textContent = "";
       report.hidden = false;
-      await loadReport(key);
+      ownerReviews.hidden = false;
+      await Promise.all([loadReport(key), loadOwnerReviews(key)]);
     }
   } catch (error) {
     ownerKey = "";
@@ -122,6 +126,9 @@ signOut.addEventListener("click", () => {
   void api("/api/owner/logout", { method: "POST", key }).catch(() => {});
   signOut.hidden = true;
   report.hidden = true;
+  ownerReviews.hidden = true;
+  ownerReviewList.replaceChildren();
+  ownerReviewFeedback.textContent = "";
   reportRequest++;
   reportSummary.textContent = "";
   reportServices.replaceChildren();
@@ -330,3 +337,96 @@ form.addEventListener("submit", async (event) => {
 window.addEventListener("focus", refreshStatus);
 window.setInterval(refreshStatus, 15000);
 refreshStatus();
+
+const reviewForm = document.querySelector("#review-form");
+const reviewFeedback = document.querySelector("#review-feedback");
+const publicReviewList = document.querySelector("#review-list");
+const publicReviewFeedback = document.querySelector("#review-list-feedback");
+const ownerReviews = document.querySelector("#owner-reviews");
+const ownerReviewList = document.querySelector("#owner-review-list");
+const ownerReviewFeedback = document.querySelector("#owner-review-feedback");
+
+function reviewItem(review) {
+  const item = document.createElement("li");
+  const rating = document.createElement("strong");
+  rating.textContent = review.rating + " out of 5 stars";
+  const comment = document.createElement("p");
+  comment.textContent = review.comment;
+  item.append(rating, comment);
+  return item;
+}
+
+async function loadReviews() {
+  try {
+    const { reviews } = await api("/api/reviews");
+    publicReviewList.replaceChildren(...reviews.map(reviewItem));
+    publicReviewFeedback.textContent = reviews.length ? "" : "No published reviews yet.";
+  } catch (error) {
+    publicReviewFeedback.textContent = error.message;
+  }
+}
+
+async function loadOwnerReviews(key) {
+  try {
+    const { reviews } = await api("/api/owner/reviews", { key });
+    if (key !== ownerKey) return;
+    ownerReviewList.replaceChildren();
+    ownerReviewFeedback.textContent = reviews.length ? "" : "No reviews to moderate.";
+    for (const review of reviews) {
+      const item = reviewItem(review);
+      const status = document.createElement("p");
+      status.textContent = review.status;
+      item.append(status);
+      const actions = review.status === "Pending" ? ["Published", "Hidden"] : ["Hidden"];
+      for (const decision of actions) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = decision === "Published" ? "Publish review" : "Hide review";
+        button.addEventListener("click", async () => {
+          const buttons = item.querySelectorAll("button");
+          for (const control of buttons) control.disabled = true;
+          try {
+            await api("/api/owner/reviews/" + review.id, { method: "PATCH", key, data: { status: decision } });
+            await Promise.all([loadOwnerReviews(key), loadReviews()]);
+          } catch (error) {
+            if (key === ownerKey) ownerReviewFeedback.textContent = error.message;
+          } finally {
+            for (const control of buttons) control.disabled = false;
+          }
+        });
+        item.append(button);
+      }
+      ownerReviewList.append(item);
+    }
+  } catch (error) {
+    if (key === ownerKey) ownerReviewFeedback.textContent = error.message;
+  }
+}
+
+reviewForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const button = reviewForm.querySelector('button[type="submit"]');
+  const comment = reviewForm.elements.comment.value.trim();
+  if (comment.length < 10) {
+    reviewFeedback.textContent = "Enter at least 10 characters about your visit.";
+    reviewForm.elements.comment.focus();
+    return;
+  }
+
+  button.disabled = true;
+  reviewFeedback.textContent = "Submitting review…";
+  try {
+    await api("/api/reviews", {
+      method: "POST", data: { rating: Number(reviewForm.elements.rating.value), comment },
+    });
+    reviewForm.reset();
+    reviewFeedback.textContent = "Thank you. Your review is waiting for owner approval.";
+    if (ownerKey) void loadOwnerReviews(ownerKey);
+  } catch (error) {
+    reviewFeedback.textContent = error.message;
+  } finally {
+    button.disabled = false;
+  }
+});
+
+void loadReviews();

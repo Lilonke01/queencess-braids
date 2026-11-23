@@ -8,6 +8,13 @@
       "when": 1795392000000,
       "tag": "0000_booking",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1795461981003,
+      "tag": "0001_reviews",
+      "breakpoints": true
     }
   ]
 }

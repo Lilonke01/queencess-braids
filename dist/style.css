@@ -379,3 +379,26 @@ footer.top { padding-block: 16px; }
   .request-row form > label,
   .request-row > details { width: 100%; }
 }
+
+.reviews { padding-block: 30px 52px; border-top: 1px solid var(--line); }
+.reviews-layout { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px; }
+#review-form { display: grid; gap: 10px; justify-items: start; }
+#review-form h3, #review-form p { margin: 0; }
+#review-form select, #review-form textarea { min-height: 44px; }
+#review-form textarea {
+  width: 100%;
+  resize: vertical;
+  padding: 10px;
+  font: inherit;
+  font-size: max(1rem, 16px);
+  border: 1px solid #b98d99;
+  border-radius: 4px;
+}
+.reviews-list { list-style: none; margin: 0; padding: 0; }
+.reviews-list li { padding-block: 12px; border-top: 1px solid var(--line); overflow-wrap: anywhere; }
+.reviews-list li p { white-space: pre-wrap; }
+#owner-reviews button { margin: 4px 8px 4px 0; }
+
+@media (max-width: 640px) {
+  .reviews-layout { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+}

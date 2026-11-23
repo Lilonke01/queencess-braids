@@ -30,6 +30,20 @@ async function api(request,env,url) {
   if(path==="/api/availability" && method==="GET") {
     return json({available:Boolean(await available(query.get("date"),query.get("time"),durations.get(query.get("style"))))});
   }
+  if (path === "/api/reviews" && method === "GET") {
+    const { results: reviews } = await sql("SELECT id,rating,comment,createdAt FROM reviews WHERE status='Published' ORDER BY createdAt DESC LIMIT 50").all();
+    return json({ reviews });
+  }
+  if (path === "/api/reviews" && method === "POST") {
+    const { rating, comment: rawComment } = await body(request);
+    const comment = typeof rawComment === "string" ? rawComment.trim() : "";
+    if (!Number.isInteger(rating) || rating < 1 || rating > 5 || comment.length < 10 || comment.length > 500) {
+      return fail("Choose a rating and enter a review of 10 to 500 characters.", 400);
+    }
+    await sql("INSERT INTO reviews (id,rating,comment,createdAt) VALUES (?,?,?,?)",
+      crypto.randomUUID(), rating, comment, new Date().toISOString()).run();
+    return json({ status: "Pending" }, 201);
+  }
   if(path==="/api/bookings" && method==="POST") {
     const {phone,area,style,date,time}=await body(request);
     const duration=durations.get(style);
@@ -80,6 +94,17 @@ async function api(request,env,url) {
   if(path==="/api/owner/logout" && method==="POST") {
     await sql("DELETE FROM sessions WHERE token=?",tokenHash).run();
     return json({signedOut:true});
+  }
+  if (path === "/api/owner/reviews" && method === "GET") {
+    const { results: reviews } = await sql("SELECT * FROM reviews WHERE status!='Hidden' ORDER BY (status='Pending') DESC, createdAt DESC LIMIT 100").all();
+    return json({ reviews });
+  }
+  const reviewMatch = path.match(/^\/api\/owner\/reviews\/([a-f0-9-]{36})$/);
+  if (reviewMatch && method === "PATCH") {
+    const { status } = await body(request);
+    if (!["Published", "Hidden"].includes(status)) return fail("Choose Publish or Hide.", 400);
+    const review = await sql("UPDATE reviews SET status=? WHERE id=? RETURNING id,status", status, reviewMatch[1]).first();
+    return review ? json({ review }) : fail("Review not found.", 404);
   }
   if(path==="/api/owner/bookings" && method==="GET") {
     const {results:bookings}=await sql("SELECT * FROM bookings ORDER BY (status IN ('Accepted','Pending')) DESC, createdAt DESC").all();

@@ -41,6 +41,15 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS bookings_date_status ON bookings(date, status);
 `);
 // Add columns to older local databases in place so existing booking references stay valid.
+db.exec(`CREATE TABLE IF NOT EXISTS reviews (
+  id TEXT PRIMARY KEY,
+  rating INTEGER NOT NULL CHECK (rating BETWEEN 1 AND 5),
+  comment TEXT NOT NULL CHECK (length(comment) BETWEEN 10 AND 500),
+  status TEXT NOT NULL DEFAULT 'Pending' CHECK (status IN ('Pending', 'Published', 'Hidden')),
+  createdAt TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS reviews_status_created ON reviews(status, createdAt);
+`);
 const columns = db.prepare("PRAGMA table_info(bookings)").all().map(({ name }) => name);
 if (!columns.includes("clientId")) db.exec("ALTER TABLE bookings ADD COLUMN clientId INTEGER REFERENCES clients(id)");
 if (!columns.includes("duration")) {
@@ -160,6 +169,21 @@ const server = createServer(async (request, response) => {
     if (path === "/api/health" && request.method === "GET") {
       return reply(response, 200, { status: "ok" });
     }
+    if (path === "/api/reviews" && request.method === "GET") {
+      const reviews = db.prepare("SELECT id,rating,comment,createdAt FROM reviews WHERE status='Published' ORDER BY createdAt DESC LIMIT 50").all();
+      return reply(response, 200, { reviews });
+    }
+    if (path === "/api/reviews" && request.method === "POST") {
+      const input = await body(request);
+      const rating = input?.rating;
+      const comment = typeof input?.comment === "string" ? input.comment.trim() : "";
+      if (!Number.isInteger(rating) || rating < 1 || rating > 5 || comment.length < 10 || comment.length > 500) {
+        return reply(response, 400, { error: "Choose a rating and enter a review of 10 to 500 characters." });
+      }
+      db.prepare("INSERT INTO reviews (id,rating,comment,createdAt) VALUES (?,?,?,?)")
+        .run(randomUUID(), rating, comment, new Date().toISOString());
+      return reply(response, 201, { status: "Pending" });
+    }
     if (path === "/api/bookings" && request.method === "POST") {
       const booking = validate(await body(request));
       if (!booking) return reply(response, 400, { error: "Check your name, phone number, service, area and future appointment time. Map links must use HTTPS." });
@@ -229,6 +253,20 @@ const server = createServer(async (request, response) => {
       if (path === "/api/owner/logout" && request.method === "POST") {
         sessions.delete(token);
         return reply(response, 200, { signedOut: true });
+      }
+      if (path === "/api/owner/reviews" && request.method === "GET") {
+        const reviews = db.prepare("SELECT * FROM reviews WHERE status!='Hidden' ORDER BY (status='Pending') DESC, createdAt DESC LIMIT 100").all();
+        return reply(response, 200, { reviews });
+      }
+      const reviewMatch = path.match(/^\/api\/owner\/reviews\/([a-f0-9-]{36})$/);
+      if (reviewMatch && request.method === "PATCH") {
+        const { status } = (await body(request)) ?? {};
+        if (!["Published", "Hidden"].includes(status)) {
+          return reply(response, 400, { error: "Choose Publish or Hide." });
+        }
+        const review = db.prepare("UPDATE reviews SET status=? WHERE id=? RETURNING id,status").get(status, reviewMatch[1]);
+        if (!review) return reply(response, 404, { error: "Review not found." });
+        return reply(response, 200, { review });
       }
       if (path === "/api/owner/bookings" && request.method === "GET") {
         return reply(response, 200, { bookings: db.prepare("SELECT b.*, c.name AS clientName, c.phone AS clientPhone FROM bookings b LEFT JOIN clients c ON c.id=b.clientId ORDER BY (b.status IN ('Pending', 'Accepted')) DESC, b.createdAt DESC").all() });
