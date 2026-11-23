@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en-ZA"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Owner dashboard | Queencess Braids</title><link rel="stylesheet" href="style.css"><script src="owner.js" defer></script></head>
+<body class="management-page"><header class="shell management-header"><a class="brand" href="/">Queencess Braids</a><div class="actions"><a href="/">View website</a><button id="owner-signout" type="button" hidden>Sign out</button></div></header><main>
+<nav class="shell owner-navigation" id="owner-navigation" aria-label="Owner navigation" hidden><a href="#site-manager">Website and pictures</a><a href="#customer-bookings">Bookings</a><a href="#owner-report">Monthly report</a><a href="#owner-reviews">Reviews</a></nav>
+    <section class="shell owner" id="owner" aria-labelledby="owner-title">
+      <div>
+        <h2 id="owner-title" tabindex="-1">Owner dashboard</h2>
+        <p class="muted">Sign in to manage bookings and view reports.</p>
+        <form id="owner-access">
+          <label>Username <input name="username" autocomplete="username" required></label>
+          <label>Password <input name="password" type="password" autocomplete="current-password" required></label>
+          <button type="submit">Sign in</button>
+          
+        </form>
+        <p id="owner-feedback" role="status"></p>
+        <section id="owner-report" hidden aria-labelledby="report-title">
+          <h3 id="report-title">Monthly booking report</h3>
+          <form id="report-filter">
+            <label for="report-month">Appointment month (YYYY-MM)</label>
+            <input id="report-month" name="month" type="month" pattern="[0-9]{4}-(0[1-9]|1[0-2])" required>
+            <button type="submit">View report</button>
+          </form>
+          <p id="report-summary" role="status"></p>
+          <ul id="report-services"></ul>
+        </section>
+        <h3 id="customer-bookings">Customer bookings</h3><p class="muted">Requests await your approval. Customer contact details are private.</p><div id="requests"></div>
+        <section id="owner-reviews" hidden aria-labelledby="owner-reviews-title">
+          <h3 id="owner-reviews-title">Moderate reviews</h3>
+          <p id="owner-review-feedback" role="status"></p>
+          <ul id="owner-review-list" class="reviews-list"></ul>
+        </section>
+      </div>
+    </section>
+
+<section id="site-manager" class="shell" hidden aria-labelledby="manager-title">
+ <h2 id="manager-title">Manage your website</h2><p>Save text changes or upload photos here. Your changes appear on the customer website when it is opened or refreshed.</p>
+ <div class="management-grid"><section class="management-card"><h3>Website text and cover</h3>
+ <form id="content-editor">
+ <label>Welcome heading<input name="headline" maxlength="120" required></label>
+ <label>Introduction<textarea name="intro" rows="5" maxlength="1200" required></textarea></label>
+ <label>Announcement (leave blank to hide)<textarea name="announcement" rows="3" maxlength="400"></textarea></label>
+ <label>Portfolio heading<input name="portfolioTitle" maxlength="100" required></label>
+ <label>Cover picture<select name="heroPhoto"><option value="">Original cover picture</option></select></label>
+ <label class="check-label"><input name="showOriginalPhotos" type="checkbox"> Show the original portfolio photos</label>
+ <button type="submit" class="button">Publish website changes</button><p id="content-feedback" role="status"></p>
+ </form></section>
+ <section class="management-card"><h3>Add a portfolio picture</h3><p>Use photos you have permission to publish. Uploaded pictures are visible to everyone.</p>
+ <form id="photo-upload"><label>Picture<input name="photo" type="file" accept="image/jpeg,image/png,image/webp" required></label><label>Caption<input name="caption" maxlength="180" required></label><p class="muted">JPEG, PNG or WebP. Photos are resized for the website before upload.</p><button class="button" type="submit">Upload and publish picture</button><p id="photo-feedback" role="status"></p></form>
+ </section></div><h3 class="photo-list-title">Your uploaded pictures</h3><div id="photo-manager-list" class="photo-manager-list"></div>
+</section></main><footer class="shell management-footer">Queencess Braids · Private owner workspace</footer></body></html>

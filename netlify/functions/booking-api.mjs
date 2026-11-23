@@ -1,7 +1,7 @@
 const backend = "https://queencess-braids-studio.kwandabuso.chatgpt.site";
 const functionPath = "/.netlify/functions/booking-api";
 
-// Keep browser requests same-origin while reusing the persistent public demo backend.
+// Keep bookings, owner management and uploaded pictures on the same website origin.
 export default async function handler(request) {
   const incoming = new URL(request.url);
   const route = incoming.pathname.startsWith(functionPath + "/")

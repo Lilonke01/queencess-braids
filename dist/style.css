@@ -455,3 +455,37 @@ header.top { position: relative; }
 .review-stars label:has(~ label input:checked) > span[aria-hidden]::before { content: "★"; }
 .review-stars label:focus-within { outline: 2px solid var(--wine); outline-offset: 2px; border-radius: 4px; }
 #review-form textarea { min-height: 140px; }
+
+.owner-launch { text-decoration: none; }
+.announcement { padding: 18px 22px; border-left: 4px solid var(--wine); background: var(--rose); margin-block: 24px 0; white-space: pre-line; }
+#hero-title.custom-headline { font-size: clamp(44px, 5.5vw, 78px); }
+.hero .intro { white-space: pre-line; }
+.management-page { background: #fff8f3; }
+.management-header { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding-block: 28px; border-bottom: 1px solid var(--line); }
+.management-page main { padding-block: 40px; }
+.management-page h2 { font-size: clamp(32px, 4vw, 48px); margin-bottom: 20px; }
+.management-page h3 { font-size: 26px; margin-block: 24px 16px; }
+.management-page button { font: 700 16px/1.4 "DM Sans", Arial, sans-serif; padding: 12px 18px; border: 1px solid var(--wine); border-radius: 8px; background: white; color: var(--wine); min-height: 44px; }
+.management-page button.button { background: var(--wine); color: white; }
+.management-page button:disabled { opacity: .6; cursor: wait; }
+.management-page input, .management-page textarea, .management-page select { width: 100%; font: inherit; background: white; color: var(--ink); padding: 12px; border: 1px solid #ba8c9b; border-radius: 6px; }
+.management-page textarea { resize: vertical; }
+.management-page label { display: grid; gap: 7px; font-weight: 600; }
+#owner-access { max-width: 460px; }
+#owner-access label { width: 100%; }
+.management-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 24px; }
+.management-card { background: white; border: 1px solid var(--line); padding: 28px; border-radius: 14px; }
+.management-card h3 { margin-top: 0; }
+.management-card form { display: grid; gap: 20px; }
+.management-page .check-label { display: flex; align-items: center; gap: 12px; }
+.management-page .check-label input { width: 20px; height: 20px; }
+.photo-manager-list { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 24px; }
+.photo-manager-list article { background: white; border: 1px solid var(--line); padding: 16px; border-radius: 12px; display: grid; gap: 12px; align-content: start; }
+.photo-manager-list img { width: 100%; height: 240px; object-fit: contain; background: var(--rose); border-radius: 8px; }
+.management-footer { padding-block: 24px; border-top: 1px solid var(--line); }
+[hidden] { display: none !important; }
+@media(max-width: 760px) { .management-grid { grid-template-columns: 1fr; } .photo-manager-list { grid-template-columns: repeat(2,minmax(0,1fr)); } .management-header { flex-wrap: wrap; } }
+@media(max-width: 480px) { .management-page .shell { width: calc(100% - 32px); } .management-card { padding: 20px; } .photo-manager-list { grid-template-columns: 1fr; } }
+
+.owner-navigation { display:flex; flex-wrap:wrap; gap: 12px; margin-bottom: 32px; }
+.owner-navigation a { padding: 10px 14px; background: white; border: 1px solid var(--line); border-radius: 8px; }
