@@ -352,7 +352,9 @@ function reviewItem(review) {
   rating.textContent = review.rating + " out of 5 stars";
   const comment = document.createElement("p");
   comment.textContent = review.comment;
-  item.append(rating, comment);
+  const name = document.createElement("p");
+  name.textContent = review.displayName || "Anonymous client";
+  item.append(rating, name, comment);
   return item;
 }
 
@@ -417,7 +419,12 @@ reviewForm.addEventListener("submit", async (event) => {
   reviewFeedback.textContent = "Submitting review…";
   try {
     await api("/api/reviews", {
-      method: "POST", data: { rating: Number(reviewForm.elements.rating.value), comment },
+      method: "POST",
+      data: {
+        rating: Number(reviewForm.elements.rating.value),
+        displayName: reviewForm.elements.displayName.value.trim(),
+        comment,
+      },
     });
     reviewForm.reset();
     reviewFeedback.textContent = "Thank you. Your review is waiting for owner approval.";

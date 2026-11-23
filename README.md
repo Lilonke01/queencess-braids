@@ -16,4 +16,4 @@ See [SPRINTS.md](SPRINTS.md) for the sprint summary and fieldwork needed for sub
 
 Follow the local setup guide above to run the website from the VS Code terminal. Open `dist/booking.js` for the browser workflow and `server/index.mjs` for the local API.
 
-Visitors can leave anonymous, moderated reviews. The owner publishes or hides them in the owner dashboard.
+Visitors can leave moderated reviews with an optional display name. The owner publishes or hides them in the owner dashboard.

@@ -15,6 +15,13 @@
       "when": 1795461981003,
       "tag": "0001_reviews",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1795462877880,
+      "tag": "0002_review_display_name",
+      "breakpoints": true
     }
   ]
 }

@@ -405,3 +405,39 @@ footer.top { padding-block: 16px; }
 
 .footer-details { display: grid; gap: 4px; min-width: 0; }
 .footer-details a { color: var(--wine); text-underline-offset: 3px; }
+
+/* Keep the review form in a single column, with large targets for touch and keyboard users. */
+.reviews-layout { grid-template-columns: minmax(0, 700px); gap: 32px; }
+#review-form {
+  padding: clamp(18px, 5vw, 38px);
+  gap: 14px;
+  background: #fbf4f5;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+#review-form h3 {
+  font: 700 clamp(1.6rem, 4vw, 2.25rem)/1.15 Georgia, serif;
+  color: var(--wine);
+}
+#review-form > label,
+.review-rating legend { font-weight: 700; margin-top: 8px; }
+#review-form input,
+#review-form textarea { background: white; font-size: max(1rem, 16px); }
+.review-rating { width: 100%; min-width: 0; border: 0; padding: 0; margin: 8px 0; }
+.review-stars { display: flex; flex-wrap: wrap; gap: clamp(0px, 1vw, 8px); margin-block: 8px; }
+.review-stars label { position: relative; display: grid; place-items: center; min-width: 44px; min-height: 48px; cursor: pointer; }
+#review-form .review-stars input,
+.review-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.review-stars label > span[aria-hidden]::before { content: "☆"; color: #805310; font-size: 2rem; line-height: 1; }
+.review-stars label:has(input:checked) > span[aria-hidden]::before,
+.review-stars label:has(~ label input:checked) > span[aria-hidden]::before { content: "★"; }
+.review-stars label:focus-within { outline: 2px solid var(--wine); outline-offset: 2px; border-radius: 4px; }
+#review-form textarea { min-height: 140px; }

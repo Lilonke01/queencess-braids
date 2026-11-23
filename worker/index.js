@@ -31,17 +31,19 @@ async function api(request,env,url) {
     return json({available:Boolean(await available(query.get("date"),query.get("time"),durations.get(query.get("style"))))});
   }
   if (path === "/api/reviews" && method === "GET") {
-    const { results: reviews } = await sql("SELECT id,rating,comment,createdAt FROM reviews WHERE status='Published' ORDER BY createdAt DESC LIMIT 50").all();
+    const { results: reviews } = await sql("SELECT id,rating,comment,createdAt,displayName FROM reviews WHERE status='Published' ORDER BY createdAt DESC LIMIT 50").all();
     return json({ reviews });
   }
   if (path === "/api/reviews" && method === "POST") {
-    const { rating, comment: rawComment } = await body(request);
+    const { rating, comment: rawComment, displayName: rawName } = await body(request);
+    const displayName = typeof rawName === "string" ? rawName.trim() : "";
+    if (displayName.length > 40) return fail("Use a display name of up to 40 characters.", 400);
     const comment = typeof rawComment === "string" ? rawComment.trim() : "";
     if (!Number.isInteger(rating) || rating < 1 || rating > 5 || comment.length < 10 || comment.length > 500) {
       return fail("Choose a rating and enter a review of 10 to 500 characters.", 400);
     }
-    await sql("INSERT INTO reviews (id,rating,comment,createdAt) VALUES (?,?,?,?)",
-      crypto.randomUUID(), rating, comment, new Date().toISOString()).run();
+    await sql("INSERT INTO reviews (id,rating,comment,createdAt,displayName) VALUES (?,?,?,?,?)",
+      crypto.randomUUID(), rating, comment, new Date().toISOString(), displayName).run();
     return json({ status: "Pending" }, 201);
   }
   if(path==="/api/bookings" && method==="POST") {

@@ -50,6 +50,10 @@ db.exec(`CREATE TABLE IF NOT EXISTS reviews (
 );
 CREATE INDEX IF NOT EXISTS reviews_status_created ON reviews(status, createdAt);
 `);
+const reviewColumns = db.prepare("PRAGMA table_info(reviews)").all();
+if (!reviewColumns.some(({ name }) => name === "displayName")) {
+  db.exec("ALTER TABLE reviews ADD COLUMN displayName TEXT NOT NULL DEFAULT ''");
+}
 const columns = db.prepare("PRAGMA table_info(bookings)").all().map(({ name }) => name);
 if (!columns.includes("clientId")) db.exec("ALTER TABLE bookings ADD COLUMN clientId INTEGER REFERENCES clients(id)");
 if (!columns.includes("duration")) {
@@ -170,18 +174,20 @@ const server = createServer(async (request, response) => {
       return reply(response, 200, { status: "ok" });
     }
     if (path === "/api/reviews" && request.method === "GET") {
-      const reviews = db.prepare("SELECT id,rating,comment,createdAt FROM reviews WHERE status='Published' ORDER BY createdAt DESC LIMIT 50").all();
+      const reviews = db.prepare("SELECT id,rating,comment,createdAt,displayName FROM reviews WHERE status='Published' ORDER BY createdAt DESC LIMIT 50").all();
       return reply(response, 200, { reviews });
     }
     if (path === "/api/reviews" && request.method === "POST") {
       const input = await body(request);
       const rating = input?.rating;
+      const displayName = typeof input?.displayName === "string" ? input.displayName.trim() : "";
+      if (displayName.length > 40) return reply(response, 400, { error: "Use a display name of up to 40 characters." });
       const comment = typeof input?.comment === "string" ? input.comment.trim() : "";
       if (!Number.isInteger(rating) || rating < 1 || rating > 5 || comment.length < 10 || comment.length > 500) {
         return reply(response, 400, { error: "Choose a rating and enter a review of 10 to 500 characters." });
       }
-      db.prepare("INSERT INTO reviews (id,rating,comment,createdAt) VALUES (?,?,?,?)")
-        .run(randomUUID(), rating, comment, new Date().toISOString());
+      db.prepare("INSERT INTO reviews (id,rating,comment,createdAt,displayName) VALUES (?,?,?,?,?)")
+        .run(randomUUID(), rating, comment, new Date().toISOString(), displayName);
       return reply(response, 201, { status: "Pending" });
     }
     if (path === "/api/bookings" && request.method === "POST") {

@@ -229,19 +229,24 @@
       <h2 id="reviews-title">Client reviews</h2>
       <div class="reviews-layout">
         <form id="review-form">
-          <h3>How were you treated?</h3>
-          <label for="review-rating">Rating</label>
-          <select id="review-rating" name="rating" required>
-            <option value="">Choose a rating</option>
-            <option value="5">5 stars · Excellent</option>
-            <option value="4">4 stars · Good</option>
-            <option value="3">3 stars · Okay</option>
-            <option value="2">2 stars · Disappointing</option>
-            <option value="1">1 star · Poor</option>
-          </select>
-          <label for="review-comment">Tell us about your visit</label>
+          <h3>How was your experience?</h3>
+          <p class="muted">Tell us about your time with Queencess Braids.</p>
+          <label for="review-name">Your display name <span class="muted">(optional)</span></label>
+          <input id="review-name" name="displayName" maxlength="40" placeholder="A nickname or fictional name" aria-describedby="review-help">
+          <fieldset class="review-rating">
+            <legend>Your star rating</legend>
+            <div class="review-stars">
+              <label><input type="radio" name="rating" value="1" required><span aria-hidden="true"></span><span class="review-visually-hidden">1 star</span></label>
+              <label><input type="radio" name="rating" value="2" required><span aria-hidden="true"></span><span class="review-visually-hidden">2 stars</span></label>
+              <label><input type="radio" name="rating" value="3" required><span aria-hidden="true"></span><span class="review-visually-hidden">3 stars</span></label>
+              <label><input type="radio" name="rating" value="4" required><span aria-hidden="true"></span><span class="review-visually-hidden">4 stars</span></label>
+              <label><input type="radio" name="rating" value="5" required><span aria-hidden="true"></span><span class="review-visually-hidden">5 stars</span></label>
+            </div>
+            <p id="review-rating-help" class="muted">Choose 1–5 stars</p>
+          </fieldset>
+          <label for="review-comment">Your experience</label>
           <textarea id="review-comment" name="comment" rows="5" minlength="10" maxlength="500" required aria-describedby="review-help"></textarea>
-          <p id="review-help" class="muted">Use 10 to 500 characters. Leave out names, phone numbers and addresses. Reviews are published after owner approval.</p>
+          <p id="review-help" class="muted">Your display name and review are public after approval. Use a nickname or fictional name and leave out private contact details.</p>
           <button class="button" type="submit">Submit review</button>
           <p id="review-feedback" role="status"></p>
         </form>
