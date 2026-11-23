@@ -402,3 +402,6 @@ footer.top { padding-block: 16px; }
 @media (max-width: 640px) {
   .reviews-layout { grid-template-columns: minmax(0, 1fr); gap: 20px; }
 }
+
+.footer-details { display: grid; gap: 4px; min-width: 0; }
+.footer-details a { color: var(--wine); text-underline-offset: 3px; }
