@@ -456,7 +456,10 @@ header.top { position: relative; }
 .review-stars label:focus-within { outline: 2px solid var(--wine); outline-offset: 2px; border-radius: 4px; }
 #review-form textarea { min-height: 140px; }
 
-.owner-launch { text-decoration: none; }
+header .owner-launch,
+header .owner-launch:visited { color: #fff; background: #731e40; text-decoration: none; }
+header .owner-launch:hover,
+header .owner-launch:focus-visible { color: #fff; background: #51122b; }
 .announcement { padding: 18px 22px; border-left: 4px solid var(--wine); background: var(--rose); margin-block: 24px 0; white-space: pre-line; }
 #hero-title.custom-headline { font-size: clamp(44px, 5.5vw, 78px); }
 .hero .intro { white-space: pre-line; }
