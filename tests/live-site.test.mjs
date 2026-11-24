@@ -40,11 +40,20 @@ test("real booking, private owner management and persistent content/photo lifecy
       assert.equal((await call(path)).status, 401);
     }
     const booking = { name: "Test Customer", phone: "082 123 4567", area: "Plettenberg Bay", mapLink: "https://maps.app.goo.gl/test", style: "Lashes", date: "2050-01-15", time: "10:00" };
+    for (const wrong of [{name:""},{name:"12345"},{phone:"not a phone"},{phone:"+27012345678"},{area:""},{date:"2000-01-15"},{date:"2050-02-30"},{time:"25:01"},{time:"23:30"},{style:"Unknown service"}]) {
+      assert.equal((await call("/bookings", {method:"POST",data:{...booking,...wrong}})).status,400,JSON.stringify(wrong));
+    }
     assert.equal((await call("/bookings", { method: "POST", data: { ...booking, phone: "+27000000001" } })).status, 400);
     assert.equal((await call("/bookings", { method: "POST", data: { ...booking, mapLink: "javascript:alert(1)" } })).status, 400);
     const created = await call("/bookings", { method: "POST", data: booking });
     assert.equal(created.status, 201);
     const { id } = await created.json();
+    assert.equal((await call("/bookings", {method:"POST",data:{...booking,name:"Another customer",phone:"083 123 4567"}})).status,409,"Pending time is already reserved");
+    assert.equal((await call("/bookings", {method:"POST",data:{...booking,phone:"083 123 4567",time:"09:00",style:"Knotless braids"}})).status,409,"Reject different starting times whose service durations overlap");
+    assert.equal((await (await call("/availability?style=Lashes&date=2050-01-15&time=10%3A30")).json()).available,false);
+    const adjacent=await call("/bookings",{method:"POST",data:{...booking,phone:"083 123 4567",time:"11:30"}});
+    assert.equal(adjacent.status,201,"Adjacent appointment starts exactly at previous end");
+    const {id:adjacentId}=await adjacent.json();
     const publicStatus = await (await call("/bookings/" + id)).json();
     assert.equal(publicStatus.status, "Pending");
     assert.equal(publicStatus.clientName, undefined);
@@ -52,12 +61,31 @@ test("real booking, private owner management and persistent content/photo lifecy
     assert.equal(login.status, 200);
     const { token } = await login.json();
     const { bookings } = await (await call("/owner/bookings", { token })).json();
-    assert.equal(bookings[0].clientPhone, "+27821234567");
-    assert.equal(bookings[0].clientName, booking.name);
-    assert.equal(bookings[0].mapLink, booking.mapLink);
+    const savedBooking=bookings.find(b=>b.id===id);
+    assert.equal(savedBooking.clientPhone, "+27821234567");
+    assert.equal(savedBooking.clientName, booking.name);
+    assert.equal(savedBooking.mapLink, booking.mapLink);
+    assert.equal((await call("/owner/bookings/"+id,{method:"PATCH",token,data:{status:"Completed"}})).status,409,"Cannot complete a pending request");
     assert.equal((await call("/owner/bookings/" + id, { method: "PATCH", token, data: { status: "Accepted" } })).status, 200);
+    assert.equal((await call("/owner/bookings/"+id,{method:"PATCH",token,data:{status:"Completed"}})).status,409,"Cannot complete before appointment starts");
+    assert.equal((await call("/owner/bookings/"+adjacentId,{method:"PATCH",token,data:{action:"reschedule",date:booking.date,time:"10:30"}})).status,409,"Owner reschedule must not double book");
+    assert.equal((await call("/owner/bookings/"+adjacentId,{method:"PATCH",token,data:{status:"Cancelled"}})).status,200);
+    assert.equal((await (await call("/availability?style=Lashes&date=2050-01-15&time=11%3A30")).json()).available,true,"Cancellation releases the time");
+    const simultaneous=await Promise.all(["084 123 4567","085 123 4567"].map(phone=>call("/bookings",{method:"POST",data:{...booking,phone,date:"2050-02-15"}})));
+    assert.deepEqual(simultaneous.map(r=>r.status).sort(),[201,409],"Only one simultaneous overlapping request succeeds");
     const availability = await (await call("/availability?style=Lashes&date=2050-01-15&time=10%3A00")).json();
     assert.equal(availability.available, false);
+    // Move the accepted appointment into the past to exercise the real Done transition without waiting.
+    const past=new Date(Date.now()-172800000).toISOString().slice(0,10);
+    sqlite.prepare("UPDATE bookings SET date=? WHERE id=?").run(past,id);
+    assert.equal((await call("/owner/bookings/"+id,{method:"PATCH",token,data:{status:"Completed"}})).status,200);
+    const active=await (await call("/owner/bookings?view=active",{token})).json();
+    assert.equal(active.bookings.some(b=>b.id===id),false,"Done is removed from active appointments");
+    const history=await (await call("/owner/bookings?view=history",{token})).json();
+    assert.equal(history.bookings.find(b=>b.id===id).status,"Completed","Done stays in private history");
+    const report=await (await call("/owner/reports/monthly?month="+past.slice(0,7),{token})).json();
+    assert.equal(report.totals.Completed,1,"Done is included in monthly reports");
+    assert.equal((await (await call("/bookings/"+id)).json()).status,"Completed","Customer receives completion status");
     assert.equal((await call("/owner/photos?caption=Test", { method: "POST", token, bytes: "bad", mime: "image/jpeg" })).status, 400);
     const bytes = new Uint8Array([255, 216, 255, 224, 0, 0]);
     const uploaded = await call("/owner/photos?caption=Test%20picture", { method: "POST", token, bytes, mime: "image/jpeg" });

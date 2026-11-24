@@ -1,7 +1,8 @@
 
 // Customer bookings and owner-only management use persistent D1 data and R2 photo storage.
 const durations = new Map([["Knotless braids",180],["Feed-in cornrows",120],["Boho braids",240],["Lashes",90]]);
-const reserved = "('Accepted','Completed','No-show')";
+// Pending requests also reserve their whole service duration until the owner declines or cancels.
+const reserved = "('Pending','Accepted','Completed','No-show')";
 const states = ["Pending","Accepted","Declined","Completed","Cancelled","No-show"];
 const open = ["Pending","Accepted"];
 const json = (data, status = 200) => Response.json(data, {status, headers: {"Cache-Control":"no-store","X-Content-Type-Options":"nosniff"}});
@@ -65,7 +66,8 @@ async function api(request,env,url) {
     const {style,date,time}=input;
     const mapLink=typeof input.mapLink==="string"?input.mapLink.trim():"";
     const duration=durations.get(style);
-    if(name.length<2 || name.length>100 || !/^\+[1-9]\d{7,14}$/.test(phone) || /^\+270000000/.test(phone) ||
+    if(name.length<2 || name.length>100 || !/\p{L}/u.test(name) || !/^\+[1-9]\d{7,14}$/.test(phone) || /^\+270000000/.test(phone) ||
+       (phone.startsWith("+27") && !/^\+27[1-9]\d{8}$/.test(phone)) ||
        area.length<2 || area.length>120 || !slot(date,time,duration) || !safeMap(mapLink)) {
       return fail("Enter your full name, a valid phone number, your area, a service and a future appointment time. Use a Google Maps link if adding a location.",400);
     }
@@ -167,7 +169,10 @@ async function api(request,env,url) {
     return review ? json({ review }) : fail("Review not found.", 404);
   }
   if(path==="/api/owner/bookings" && method==="GET") {
-    const {results:bookings}=await sql("SELECT * FROM bookings WHERE clientPhone NOT GLOB '+270000000*' ORDER BY (status IN ('Accepted','Pending')) DESC, createdAt DESC").all();
+    const view=query.get("view") || "all";
+    if(!["all","active","history"].includes(view)) return fail("Choose active bookings or history.",400);
+    const filter=view==="active"?" AND status IN ('Pending','Accepted')":view==="history"?" AND status NOT IN ('Pending','Accepted')":"";
+    const {results:bookings}=await sql("SELECT * FROM bookings WHERE clientPhone NOT GLOB '+270000000*'"+filter+" ORDER BY (status IN ('Accepted','Pending')) DESC, date DESC,time DESC,createdAt DESC").all();
     return json({bookings});
   }
   if(path==="/api/owner/reports/monthly" && method==="GET") {

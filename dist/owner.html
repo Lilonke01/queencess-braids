@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en-ZA"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Owner dashboard | Queencess Braids</title><link rel="stylesheet" href="style.css"><script src="owner.js" defer></script></head>
 <body class="management-page"><header class="shell management-header"><a class="brand" href="/">Queencess Braids</a><div class="actions"><a href="/">View website</a><button id="owner-signout" type="button" hidden>Sign out</button></div></header><main>
-<nav class="shell owner-navigation" id="owner-navigation" aria-label="Owner navigation" hidden><a href="#site-manager">Website and pictures</a><a href="#customer-bookings">Bookings</a><a href="#owner-report">Monthly report</a><a href="#owner-reviews">Reviews</a></nav>
+<nav class="shell owner-navigation" id="owner-navigation" aria-label="Owner navigation" hidden><a href="#site-manager">Website and pictures</a><a href="#customer-bookings">Active appointments</a><a href="#booking-history">Appointment history</a><a href="#owner-report">Monthly report</a><a href="#owner-reviews">Reviews</a><button id="refresh-bookings" type="button">Refresh appointments</button></nav>
     <section class="shell owner" id="owner" aria-labelledby="owner-title">
       <div>
         <h2 id="owner-title" tabindex="-1">Owner dashboard</h2>
@@ -23,7 +23,8 @@
           <p id="report-summary" role="status"></p>
           <ul id="report-services"></ul>
         </section>
-        <h3 id="customer-bookings">Customer bookings</h3><p class="muted">Requests await your approval. Customer contact details are private.</p><div id="requests"></div>
+        <h3 id="customer-bookings">Active appointments</h3><p class="muted">Pending requests reserve their full service time. Approve a request before the visit. When finished, select Done to move it to history. Decline or cancel unused requests to release their time.</p><div id="requests"></div>
+        <details id="booking-history" hidden><summary>Appointment history</summary><p class="muted">Completed, declined, cancelled and missed appointments are kept here. Customer details remain private.</p><div id="booking-history-list"></div></details>
         <section id="owner-reviews" hidden aria-labelledby="owner-reviews-title">
           <h3 id="owner-reviews-title">Moderate reviews</h3>
           <p id="owner-review-feedback" role="status"></p>

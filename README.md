@@ -1,8 +1,8 @@
 # Queencess Braids
 
-Clients can check availability and request mobile braiding or lash appointments. The owner dashboard supports approvals, declines, cancellations, rescheduling, completion, and no-shows. Monthly reporting includes completed visits and unique clients.
+Clients can check availability and request mobile braiding or lash appointments. Pending and approved appointments reserve the complete service duration, so overlapping requests and reschedules are rejected atomically in the database. The owner selects **Done** after an approved appointment has started to remove it from the active list. Completed records remain in private appointment history and monthly reports. Declining or cancelling a request releases its reserved time.
 
-See the [setup and deployment guide](server/README.md) to run the booking server. Use fictional details for assignment review.
+Use the live setup instructions below to run the same backend as production. The older prototype is available separately with `npm run start:legacy`.
 
 See [SPRINTS.md](SPRINTS.md) for the sprint summary and fieldwork needed for submission.
 

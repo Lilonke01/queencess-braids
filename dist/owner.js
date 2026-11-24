@@ -1,5 +1,6 @@
 "use strict";
 const board = document.querySelector("#requests");
+const historyBoard = document.querySelector("#booking-history-list");
 const ownerAccess = document.querySelector("#owner-access");
 const ownerFeedback = document.querySelector("#owner-feedback");
 const signOut = document.querySelector("#owner-signout");
@@ -74,6 +75,8 @@ ownerAccess.addEventListener("submit", async (event) => {
   ownerReviewList.replaceChildren();
   ownerReviewFeedback.textContent = "";
   board.replaceChildren();
+  historyBoard.replaceChildren();
+  document.querySelector("#booking-history").hidden = true;
   signOut.hidden = true;
   ownerFeedback.textContent = "Signing in…";
   try {
@@ -88,6 +91,7 @@ ownerAccess.addEventListener("submit", async (event) => {
       ownerAccess.hidden = true;
       document.querySelector("#site-manager").hidden = false;
       document.querySelector("#owner-navigation").hidden = false;
+      document.querySelector("#booking-history").hidden = false;
       await Promise.all([loadReport(key), loadOwnerReviews(key), loadContentEditor()]);
     }
   } catch (error) {
@@ -98,6 +102,8 @@ ownerAccess.addEventListener("submit", async (event) => {
     report.hidden = true;
     ownerReviews.hidden = true;
     board.replaceChildren();
+    historyBoard.replaceChildren();
+    document.querySelector("#booking-history").hidden = true;
     document.querySelector("#site-manager").hidden = true;
     document.querySelector("#owner-navigation").hidden = true;
     ownerFeedback.textContent = error.message;
@@ -125,6 +131,8 @@ signOut.addEventListener("click", () => {
   document.querySelector("#owner-navigation").hidden = true;
   document.querySelector("#photo-manager-list").replaceChildren();
   board.replaceChildren();
+  historyBoard.replaceChildren();
+  document.querySelector("#booking-history").hidden = true;
 });
 
 // Use the salon time zone when deciding which appointment dates are in the past.
@@ -138,9 +146,14 @@ function dateInSouthAfrica() {
 
 // Rebuild the owner panel from the saved requests.
 function render(requests) {
+  renderBookingRows(requests.filter(request => ["Pending", "Accepted"].includes(request.status)), board, "No active appointments.");
+  renderBookingRows(requests.filter(request => !["Pending", "Accepted"].includes(request.status)), historyBoard, "No finished appointments yet.");
+}
+
+function renderBookingRows(requests, board, emptyMessage) {
   board.replaceChildren();
   if (!requests.length) {
-    board.textContent = "No requests yet.";
+    board.textContent = emptyMessage;
     return;
   }
 
@@ -183,8 +196,9 @@ function render(requests) {
       if (!started) actions.push(["Approve", "Accepted"]);
       actions.push(["Decline", "Declined"]);
     }
-    if (request.status === "Accepted" && started) {
-      actions.push(["Mark completed", "Completed"], ["Mark no-show", "No-show"]);
+    if (request.status === "Accepted") {
+      actions.push(["Done", "Completed"]);
+      if (started) actions.push(["Mark no-show", "No-show"]);
     }
     if (open) actions.push(["Cancel booking", "Cancelled"]);
     if (actions.length) {
@@ -194,6 +208,10 @@ function render(requests) {
         button.type = "button";
         button.textContent = label;
         button.setAttribute("aria-label", `${label} for ${request.style} on ${request.date} at ${request.time}`);
+        if (status === "Completed" && !started) {
+          button.disabled = true;
+          button.title = "Done is available once the appointment has started.";
+        }
         button.addEventListener("click", () => updateBooking(request.id, { status }, button));
         controls.append(button);
       }
@@ -229,7 +247,7 @@ async function updateBooking(id, data, button) {
     await api("/api/owner/bookings/" + id, { method: "PATCH", key, data });
     await loadOwner(key);
     if (key === ownerKey) {
-      ownerFeedback.textContent = "Booking updated.";
+      ownerFeedback.textContent = data.status === "Completed" ? "Appointment marked Done and removed from active appointments. The record is kept in history and monthly reports." : "Booking updated.";
       document.querySelector("#owner-title").focus();
       void loadReport(key);
     }
@@ -291,6 +309,20 @@ async function loadOwnerReviews(key) {
 }
 
 const contentEditor = document.querySelector("#content-editor");
+const refreshBookings = document.querySelector("#refresh-bookings");
+refreshBookings.addEventListener("click", async () => {
+  if (!ownerKey) return;
+  refreshBookings.disabled = true;
+  const key = ownerKey;
+  try { await Promise.all([loadOwner(key), loadReport(key)]); }
+  catch (error) { if (key === ownerKey) ownerFeedback.textContent = error.message; }
+  finally { refreshBookings.disabled = false; }
+});
+// Keep the owner list current when customers book or an appointment reaches its start time.
+setInterval(() => {
+  const key = ownerKey;
+  if (key) void loadOwner(key).catch(error => { if (key === ownerKey) ownerFeedback.textContent = error.message; });
+}, 30000);
 const contentFeedback = document.querySelector("#content-feedback");
 const photoUpload = document.querySelector("#photo-upload");
 const photoFeedback = document.querySelector("#photo-feedback");

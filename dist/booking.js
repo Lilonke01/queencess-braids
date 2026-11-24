@@ -29,7 +29,15 @@ async function refreshStatus() {
   if (!id) return;
   try {
     const { status, date, time } = await api("/api/bookings/" + encodeURIComponent(id));
-    if (id === latestId) latest.textContent = `Latest booking: ${status} · ${date} at ${time} SAST.`;
+    if (id === latestId) {
+      if (["Completed", "Cancelled", "Declined", "No-show"].includes(status)) {
+        latest.textContent = status === "Completed" ? "Your appointment is done. Thank you for choosing Queencess Braids." : `Booking ${status.toLowerCase()}. You can request another appointment below.`;
+        latestId = null;
+        try { localStorage.removeItem(storageKey); } catch {}
+        sendBooking.hidden = true;
+        sendBooking.removeAttribute("href");
+      } else latest.textContent = `Latest booking: ${status} · ${date} at ${time} SAST.`;
+    }
   } catch (error) {
     if (id === latestId) latest.textContent = "Status unavailable. " + error.message;
   }

@@ -3,7 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "node server/index.mjs",
+    "start": "node server/live.mjs",
+    "start:legacy": "node server/index.mjs",
     "start:live": "node server/live.mjs",
     "test": "node --test tests/*.test.mjs"
   },
