@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en-ZA"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Owner dashboard | Queencess Braids</title><link rel="stylesheet" href="style.css"><script src="owner.js" defer></script></head>
+<html lang="en-ZA"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Owner dashboard | Queencess Braids</title><link rel="stylesheet" href="style.css"><script src="owner.js" defer></script><script src="owner-push.js" defer></script></head>
 <body class="management-page"><header class="shell management-header"><a class="brand" href="/">Queencess Braids</a><div class="actions"><a href="/">View website</a><button id="owner-signout" type="button" hidden>Sign out</button></div></header><main>
 <nav class="shell owner-navigation" id="owner-navigation" aria-label="Owner navigation" hidden><a href="#site-manager">Website and pictures</a><a href="#customer-bookings">Active appointments</a><a href="#booking-history">Appointment history</a><a href="#owner-report">Monthly report</a><a href="#owner-reviews">Reviews</a><button id="refresh-bookings" type="button">Refresh appointments</button></nav>
     <section class="shell owner" id="owner" aria-labelledby="owner-title">
@@ -13,6 +13,13 @@
           
         </form>
         <p id="owner-feedback" role="status"></p>
+        <section id="booking-alerts" class="management-card" hidden aria-labelledby="alerts-title">
+          <h3 id="alerts-title">Booking alerts on this phone</h3>
+          <p>Enable alerts in Chrome on your Android phone. You can receive an alert when a booking arrives, even when this page is closed. Tap the alert to open the owner dashboard.</p>
+          <p>Alerts contain no customer details. This device stays subscribed after sign-out until you disable alerts.</p>
+          <div class="actions"><button id="enable-push" type="button">Enable booking alerts</button><button id="test-push" type="button" hidden>Send test alert</button><button id="disable-push" type="button" hidden>Disable alerts on this device</button></div>
+          <p id="push-feedback" role="status"></p>
+        </section>
         <section id="owner-report" hidden aria-labelledby="report-title">
           <h3 id="report-title">Monthly booking report</h3>
           <form id="report-filter">

@@ -17,7 +17,7 @@ function slot(date,time,duration) {
 // The overlap query runs inside INSERT or UPDATE, so availability and the write happen atomically in D1.
 const overlap = `SELECT 1 FROM bookings WHERE date=? AND status IN ${reserved}
   AND clientPhone NOT GLOB '+270000000*' AND id!=? AND starts<? AND starts+duration>?`;
-async function api(request,env,url) {
+async function api(request,env,url,context) {
   const db=env.DB;
   const {pathname:path,searchParams:query}=url;
   const {method}=request;
@@ -77,7 +77,11 @@ async function api(request,env,url) {
       AND NOT EXISTS (SELECT 1 FROM bookings WHERE clientPhone=? AND style=? AND date=? AND time=? AND status='Pending')
       RETURNING id,status`,id,style,area,date,time,starts,duration,name,phone,new Date().toISOString(),mapLink,
       date,id,starts+duration,starts,phone,style,date,time).first();
-    return booking?json(booking,201):fail("This time is unavailable or you already requested it.",409);
+    if(!booking) return fail("This time is unavailable or you already requested it.",409);
+    // The appointment is already saved. Notification failures must never lose or repeat a booking.
+    const alert=sendOwnerPush(db,env).catch(()=>{});
+    if(context?.waitUntil) context.waitUntil(alert); else await alert;
+    return json(booking,201);
   }
   const reference=path.match(/^\/api\/bookings\/([a-f0-9-]{36})$/);
   if(reference && method==="GET") {
@@ -112,6 +116,33 @@ async function api(request,env,url) {
   if(path==="/api/owner/logout" && method==="POST") {
     await sql("DELETE FROM sessions WHERE token=?",tokenHash).run();
     return json({signedOut:true});
+  }
+  if(path==="/api/owner/push" && method==="GET") {
+    const {results:devices}=await sql("SELECT id,lastAcceptedAt,lastError FROM owner_push_subscriptions ORDER BY createdAt DESC").all();
+    return json({configured:Boolean(env.PUSH_PUBLIC_KEY&&env.PUSH_PRIVATE_JWK),publicKey:env.PUSH_PUBLIC_KEY||"",devices});
+  }
+  if(path==="/api/owner/push" && method==="POST") {
+    if(!env.PUSH_PUBLIC_KEY||!env.PUSH_PRIVATE_JWK) return fail("Booking alerts are not configured yet.",503);
+    const {endpoint}=await body(request);
+    if(!validPushEndpoint(endpoint)) return fail("This browser returned an unsupported push address. Use Chrome on Android.",400);
+    const id=await hash(endpoint);
+    const exists=await sql("SELECT id FROM owner_push_subscriptions WHERE id=?",id).first();
+    const {count}=await sql("SELECT count(*) AS count FROM owner_push_subscriptions").first();
+    if(!exists&&count>=10) return fail("Alerts are already enabled on 10 devices. Disable an unused device first.",400);
+    await sql("INSERT INTO owner_push_subscriptions(id,endpoint,createdAt) VALUES(?,?,?) ON CONFLICT(id) DO UPDATE SET endpoint=excluded.endpoint,lastError=''",id,endpoint,new Date().toISOString()).run();
+    return json({id},201);
+  }
+  if(path==="/api/owner/push" && method==="DELETE") {
+    const {id}=await body(request);
+    if(typeof id!=="string"||!/^[a-f0-9]{64}$/.test(id)) return fail("Choose this device's alert subscription.",400);
+    await sql("DELETE FROM owner_push_subscriptions WHERE id=?",id).run();
+    return json({disabled:true});
+  }
+  if(path==="/api/owner/push/test" && method==="POST") {
+    const {id}=await body(request);
+    if(typeof id!=="string"||!/^[a-f0-9]{64}$/.test(id)) return fail("Enable alerts on this device first.",400);
+    const result=await sendOwnerPush(db,env,id);
+    return result.accepted?json({accepted:true}):fail("The push service did not accept the test. Check permission, then disable and re-enable alerts.",502);
   }
   if(path==="/api/owner/content" && method==="GET") return json(await siteContent(sql));
   if(path==="/api/owner/content" && method==="PUT") {
@@ -277,15 +308,54 @@ async function body(request) {
   } catch {}
   throw fail("Send a JSON object.",400);
 }
+export function validPushEndpoint(endpoint) {
+  if(typeof endpoint!=="string"||endpoint.length>2048) return false;
+  try {
+    const u=new URL(endpoint);
+    return u.protocol==="https:"&&!u.username&&!u.password&&!u.port&&!u.hash&&u.pathname.length>2&&
+      ["fcm.googleapis.com","updates.push.services.mozilla.com","web.push.apple.com"].includes(u.hostname);
+  } catch { return false; }
+}
+const base64url=bytes=>btoa(String.fromCharCode(...new Uint8Array(bytes))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/g,"");
+export async function sendOwnerPush(db,env,onlyId,send=fetch) {
+  if(!env.PUSH_PUBLIC_KEY||!env.PUSH_PRIVATE_JWK) return {accepted:0};
+  const sql=(query,...args)=>db.prepare(query).bind(...args);
+  const {results:devices}=await sql("SELECT id,endpoint FROM owner_push_subscriptions"+(onlyId?" WHERE id=?":""),...(onlyId?[onlyId]:[])).all();
+  if(!devices.length) return {accepted:0};
+  // A standard, signed, empty Web Push wakes the service worker. No customer data is sent.
+  const key=await crypto.subtle.importKey("jwk",JSON.parse(env.PUSH_PRIVATE_JWK),{name:"ECDSA",namedCurve:"P-256"},false,["sign"]);
+  let accepted=0;
+  await Promise.all(devices.map(async device=>{
+    try {
+      if(!validPushEndpoint(device.endpoint)) throw new Error("Invalid push endpoint");
+      const header=base64url(new TextEncoder().encode(JSON.stringify({typ:"JWT",alg:"ES256"})));
+      const claims=base64url(new TextEncoder().encode(JSON.stringify({aud:new URL(device.endpoint).origin,exp:Math.floor(Date.now()/1000)+3600,sub:"mailto:aliciaemihle52@gmail.com"})));
+      const unsigned=header+"."+claims;
+      const signature=await crypto.subtle.sign({name:"ECDSA",hash:"SHA-256"},key,new TextEncoder().encode(unsigned));
+      const response=await send(device.endpoint,{method:"POST",headers:{Authorization:`vapid t=${unsigned}.${base64url(signature)}, k=${env.PUSH_PUBLIC_KEY}`,TTL:"3600",Urgency:"high","Content-Length":"0"},redirect:"error",signal:AbortSignal.timeout(8000)});
+      if(response.status===404||response.status===410) {
+        await sql("DELETE FROM owner_push_subscriptions WHERE id=?",device.id).run();
+      } else if(response.ok) {
+        accepted++;
+        await sql("UPDATE owner_push_subscriptions SET lastAcceptedAt=?,lastError='' WHERE id=?",new Date().toISOString(),device.id).run();
+      } else {
+        await sql("UPDATE owner_push_subscriptions SET lastError=? WHERE id=?","Push service response "+response.status,device.id).run();
+      }
+    } catch {
+      await sql("UPDATE owner_push_subscriptions SET lastError=? WHERE id=?","Could not reach the push service. Try the test alert again.",device.id).run();
+    }
+  }));
+  return {accepted};
+}
 async function hash(value) {
   return Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256",new TextEncoder().encode(value))),
     byte=>byte.toString(16).padStart(2,"0")).join("");
 }
 export default {
-  async fetch(request,env) {
+  async fetch(request,env,context) {
     const url=new URL(request.url);
     if(url.pathname.startsWith("/api/")) {
-      try { return await api(request,env,url); }
+      try { return await api(request,env,url,context); }
       catch(error) {
         if(error instanceof Response) return error;
         console.error(error);
@@ -297,7 +367,7 @@ export default {
     const asset=Object.hasOwn(ASSETS,path)?ASSETS[path]:null;
     if(!asset) return new Response("Not found",{status:404});
     return new Response(request.method==="HEAD"?null:Uint8Array.from(atob(asset.data),value=>value.charCodeAt(0)), {
-      headers: {"Content-Type":asset.type,"X-Content-Type-Options":"nosniff"}
+      headers: {"Content-Type":asset.type,"X-Content-Type-Options":"nosniff",...(path==="/owner-sw.js"?{"Cache-Control":"no-cache","Service-Worker-Allowed":"/"}:{})}
     });
   }
 };

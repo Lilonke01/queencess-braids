@@ -92,6 +92,8 @@ ownerAccess.addEventListener("submit", async (event) => {
       document.querySelector("#site-manager").hidden = false;
       document.querySelector("#owner-navigation").hidden = false;
       document.querySelector("#booking-history").hidden = false;
+      document.querySelector("#booking-alerts").hidden = false;
+      void loadPushSettings();
       await Promise.all([loadReport(key), loadOwnerReviews(key), loadContentEditor()]);
     }
   } catch (error) {
@@ -106,6 +108,7 @@ ownerAccess.addEventListener("submit", async (event) => {
     document.querySelector("#booking-history").hidden = true;
     document.querySelector("#site-manager").hidden = true;
     document.querySelector("#owner-navigation").hidden = true;
+    document.querySelector("#booking-alerts").hidden = true;
     ownerFeedback.textContent = error.message;
   } finally {
     button.disabled = false;
@@ -129,6 +132,7 @@ signOut.addEventListener("click", () => {
   ownerAccess.hidden = false;
   document.querySelector("#site-manager").hidden = true;
   document.querySelector("#owner-navigation").hidden = true;
+  document.querySelector("#booking-alerts").hidden = true;
   document.querySelector("#photo-manager-list").replaceChildren();
   board.replaceChildren();
   historyBoard.replaceChildren();

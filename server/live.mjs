@@ -31,6 +31,7 @@ const photoPath = key => {
 };
 const env = {
   OWNER_USERNAME: process.env.OWNER_USERNAME, OWNER_PASSWORD: process.env.OWNER_PASSWORD,
+  PUSH_PUBLIC_KEY: process.env.PUSH_PUBLIC_KEY, PUSH_PRIVATE_JWK: process.env.PUSH_PRIVATE_JWK,
   DB: { prepare(query) { return { bind(...args) {
     const statement = db.prepare(query);
     return { first: async () => statement.get(...args) ?? null,

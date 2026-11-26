@@ -6,7 +6,7 @@ import worker from "../worker/index.js";
 
 test("real booking, private owner management and persistent content/photo lifecycle", async () => {
   const sqlite = new DatabaseSync(":memory:");
-  for (const migration of ["0000_booking", "0001_reviews", "0002_review_display_name", "0003_live_content"]) {
+  for (const migration of ["0000_booking", "0001_reviews", "0002_review_display_name", "0003_live_content", "0004_owner_push"]) {
     sqlite.exec(readFileSync(new URL(`../drizzle/${migration}.sql`, import.meta.url), "utf8"));
   }
   const files = new Map();
